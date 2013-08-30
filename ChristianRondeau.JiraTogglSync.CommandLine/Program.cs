@@ -10,6 +10,7 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Not Implemented Yet!");
         }
     }
 }

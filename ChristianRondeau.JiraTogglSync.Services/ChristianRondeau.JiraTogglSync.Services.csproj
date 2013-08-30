@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DCF69B82-A833-4501-8F81-0BD0AB84652B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{331AC73B-91AE-4E76-ACC1-3923D0479188}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ChristianRondeau.JiraTogglSync.CommandLine</RootNamespace>
-    <AssemblyName>ChristianRondeau.JiraTogglSync.CommandLine</AssemblyName>
+    <RootNamespace>ChristianRondeau.JiraTogglSync.Services</RootNamespace>
+    <AssemblyName>ChristianRondeau.JiraTogglSync.Services</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -41,17 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="TogglService.cs" />
+    <Compile Include="JiraService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ChristianRondeau.JiraTogglSync.Services\ChristianRondeau.JiraTogglSync.Services.csproj">
-      <Project>{331ac73b-91ae-4e76-acc1-3923d0479188}</Project>
-      <Name>ChristianRondeau.JiraTogglSync.Services</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

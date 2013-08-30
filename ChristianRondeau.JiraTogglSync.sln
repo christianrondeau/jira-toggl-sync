@@ -5,6 +5,10 @@ VisualStudioVersion = 12.0.20623.1 VSUPREVIEW
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.CommandLine", "ChristianRondeau.JiraTogglSync.CommandLine\ChristianRondeau.JiraTogglSync.CommandLine.csproj", "{DCF69B82-A833-4501-8F81-0BD0AB84652B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.Services", "ChristianRondeau.JiraTogglSync.Services\ChristianRondeau.JiraTogglSync.Services.csproj", "{331AC73B-91AE-4E76-ACC1-3923D0479188}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.Tests", "ChristianRondeau.JiraTogglSync.Tests\ChristianRondeau.JiraTogglSync.Tests.csproj", "{CB8EC80D-7194-41E6-B188-18BAA0974631}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{331AC73B-91AE-4E76-ACC1-3923D0479188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{331AC73B-91AE-4E76-ACC1-3923D0479188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{331AC73B-91AE-4E76-ACC1-3923D0479188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{331AC73B-91AE-4E76-ACC1-3923D0479188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB8EC80D-7194-41E6-B188-18BAA0974631}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB8EC80D-7194-41E6-B188-18BAA0974631}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB8EC80D-7194-41E6-B188-18BAA0974631}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB8EC80D-7194-41E6-B188-18BAA0974631}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
