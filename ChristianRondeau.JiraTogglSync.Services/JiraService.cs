@@ -2,7 +2,7 @@
 
 namespace ChristianRondeau.JiraTogglSync.Services
 {
-    public class JiraService
+	public class JiraService : IWorksheetTargetService
     {
         private readonly Jira _jira;
 

@@ -16,6 +16,13 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
             var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
             var jira = new JiraService(jiraInstance, jiraUsername, jiraPassword);
             Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
+
+	        var sync = new WorksheetSyncService(toggl, jira);
+
+	        foreach (var suggestion in sync.GetSuggestions(DateTime.Now.AddDays(-14), DateTime.Now))
+	        {
+		        Console.WriteLine(suggestion.ToString());
+	        }
         }
 
         private static string AskFor(string what)

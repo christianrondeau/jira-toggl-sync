@@ -53,6 +53,7 @@
     <Compile Include="TogglServiceTests.cs" />
     <Compile Include="JiraServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorkLogEntryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChristianRondeau.JiraTogglSync.Services\ChristianRondeau.JiraTogglSync.Services.csproj">
