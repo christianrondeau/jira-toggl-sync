@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.20623.1 VSUPREVIEW
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.CommandLine", "ChristianRondeau.JiraTogglSync.CommandLine\ChristianRondeau.JiraTogglSync.CommandLine.csproj", "{DCF69B82-A833-4501-8F81-0BD0AB84652B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCF69B82-A833-4501-8F81-0BD0AB84652B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
