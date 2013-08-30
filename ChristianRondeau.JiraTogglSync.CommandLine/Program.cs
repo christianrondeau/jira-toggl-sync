@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ChristianRondeau.JiraTogglSync.Services;
 
 namespace ChristianRondeau.JiraTogglSync.CommandLine
 {
@@ -10,7 +7,17 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Not Implemented Yet!");
+            var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
+
+            var toggl = new TogglService(togglApiKey);
+
+            Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
+        }
+
+        private static string AskFor(string what)
+        {
+            Console.Write("Please enter your {0}: ", what);
+            return Console.ReadLine();
         }
     }
 }

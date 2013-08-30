@@ -10,7 +10,7 @@ namespace ChristianRondeau.JiraTogglSync.Tests
         [TestMethod]
         public void CanBeCreated()
         {
-            new TogglService();
+            new TogglService("my-api-key");
         }
     }
 }
