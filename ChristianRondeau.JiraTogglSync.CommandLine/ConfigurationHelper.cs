@@ -10,6 +10,20 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
     {
         static byte[] entropy = Encoding.Unicode.GetBytes("ChristianRondeau.JiraTogglSync.Salt");
 
+        public static string GetValueFromConfig(string key, Func<string> askForValue)
+        {
+            var value = ConfigurationManager.AppSettings[key];
+
+            if (value != null)
+                return value;
+
+            value = askForValue();
+
+            SaveConfig(key, value);
+
+            return value;
+        }
+
         public static string GetEncryptedValueFromConfig(string key, Func<string> askForValue)
         {
             var value = ConfigurationManager.AppSettings[key];

@@ -8,10 +8,14 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
         static void Main(string[] args)
         {
             var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
-
             var toggl = new TogglService(togglApiKey);
-
             Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
+
+            var jiraInstance = ConfigurationHelper.GetValueFromConfig("jira-instance", () => AskFor("JIRA Instance"));
+            var jiraUsername = ConfigurationHelper.GetValueFromConfig("jira-username", () => AskFor("JIRA Username"));
+            var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
+            var jira = new JiraService(jiraInstance, jiraUsername, jiraPassword);
+            Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
         }
 
         private static string AskFor(string what)

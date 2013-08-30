@@ -10,7 +10,7 @@ namespace ChristianRondeau.JiraTogglSync.Tests
         [TestMethod]
         public void CanBeCreated()
         {
-            new JiraService();
+            new JiraService("https://christianrondeau.atlassian.net", "christianrondeau", "mypassword");
         }
     }
 }
