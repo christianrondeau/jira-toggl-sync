@@ -1,4 +1,4 @@
-jira-toggl-sync (ALPHA)
+jira-toggl-sync (BETA)
 =======================
 
 A simple tool to synchronize Toggl time entries into Atlassian JIRA's work log entries
