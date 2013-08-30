@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ChristianRondeau.JiraTogglSync.CommandLine</RootNamespace>
-    <AssemblyName>ChristianRondeau.JiraTogglSync.CommandLine</AssemblyName>
+    <AssemblyName>jira-toggl-sync</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
