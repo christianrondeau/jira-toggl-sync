@@ -4,6 +4,7 @@ namespace ChristianRondeau.JiraTogglSync.Services
 {
 	public interface IWorksheetTargetService
 	{
-		IEnumerable<Issue> LoadIncidents(IEnumerable<string> keys);
+		IEnumerable<Issue> LoadIssues(IEnumerable<string> keys);
+		void AddWorkLog(WorkLogEntry entry);
 	}
 }

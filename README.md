@@ -7,9 +7,11 @@ Open a command line in the tool directory and type:
 
 > jira-toggl-sync
 
-The tool will prompt for a Toggl API key (which can be found in your profile page at the bottom), and for a JIRA instance URL, username and password.
+The tool will prompt for a Toggl API key (which can be found in your profile page at the bottom), and for a JIRA instance URL, username, password and the JIRA project keys you want.
 
-The tool will then exit, as nothing else was implemented yet!
+A list of issues will then be shown. You can accept to enter a worklog for it by pressing "y".
+
+Only issues from the last 14 days with a matching JIRA key will be selected.
 
 Copyright and license
 =====================

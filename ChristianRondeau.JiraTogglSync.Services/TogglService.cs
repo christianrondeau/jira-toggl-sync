@@ -25,15 +25,15 @@ namespace ChristianRondeau.JiraTogglSync.Services
 
 		public IEnumerable<WorkLogEntry> GetEntries(DateTime startDate, DateTime endDate)
 		{
-			var timeSrv = new TimeEntryService(_apiKey);
-			var prams = new TimeEntryParams
-				{
-					StartDate = startDate,
-					EndDate = endDate
-				};
+			var timeEntryService = new TimeEntryService(_apiKey);
 
-			var hours = timeSrv.List(prams)
-			                   .Where(w => !string.IsNullOrEmpty(w.Description));
+			var hours = timeEntryService
+				.List(new TimeEntryParams
+					{
+						StartDate = startDate,
+						EndDate = endDate
+					})
+				.Where(w => !string.IsNullOrEmpty(w.Description));
 
 			return hours.Select(ToWorkLogEntry);
 		}
@@ -42,6 +42,8 @@ namespace ChristianRondeau.JiraTogglSync.Services
 		{
 			return new WorkLogEntry
 				{
+					Start = DateTime.Parse(arg.Start),
+					Stop = DateTime.Parse(arg.Stop),
 					Description = arg.Description
 				};
 		}

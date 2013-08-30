@@ -23,20 +23,41 @@ namespace ChristianRondeau.JiraTogglSync.Services
 		{
 			var sourceEntries = _source.GetEntries(fromDate, toDate).ToList();
 
-			var jiraIncentKeys = sourceEntries.Select(ExtractJiraIncidentNumber).Where(x => x != null).Distinct();
+			foreach (var entry in sourceEntries)
+			{
+				entry.IssueKey = ExtractJiraIncidentNumber(entry.Description);
+				entry.Description = RemoveIncidentNumber(entry.Description, entry.IssueKey);
+			}
 
-			var incidents = _target.LoadIncidents(jiraIncentKeys);
+			var validEntries = sourceEntries.Where(entry => entry.IssueKey != null);
+
+			var issues = _target.LoadIssues(validEntries.Select(entry => entry.IssueKey).Distinct()).ToList();
+
+			foreach (var issue in issues)
+			{
+				issue.WorkLog.AddRange(sourceEntries.Where(entry => entry.IssueKey == issue.Key));
+			}
 			
-			return incidents;
+			return issues;
 		}
 
-		private string ExtractJiraIncidentNumber(WorkLogEntry arg)
+		private static string RemoveIncidentNumber(string description, string issueKey)
+		{
+			return new Regex("^" + issueKey + @"[\s:]+").Replace(description, "");
+		}
+
+		private string ExtractJiraIncidentNumber(string description)
 		{
 			return _regexes
-				.Select(regex => regex.Match(arg.Description))
+				.Select(regex => regex.Match(description))
 				.Where(x => x.Success)
 				.Select(x => x.Value)
 				.FirstOrDefault();
+		}
+
+		public void AddWorkLog(WorkLogEntry entry)
+		{
+			_target.AddWorkLog(entry);
 		}
 	}
 }

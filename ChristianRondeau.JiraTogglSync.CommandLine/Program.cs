@@ -20,9 +20,22 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
 
 			var sync = new WorksheetSyncService(toggl, jira, jiraKeyPrefixes.Split(','));
 
-	        foreach (var suggestion in sync.GetSuggestions(DateTime.Now.AddDays(-14), DateTime.Now))
+	        foreach (var issue in sync.GetSuggestions(DateTime.Now.AddDays(-14), DateTime.Now))
 	        {
-		        Console.WriteLine(suggestion.ToString());
+		        var issueTitle = issue.ToString();
+		        Console.WriteLine(issueTitle);
+				Console.WriteLine(new String('=', issueTitle.Length));
+
+		        foreach (var entry in issue.WorkLog)
+		        {
+			        Console.Write(entry.ToString() + " (y/n)");
+			        if (Console.ReadKey(true).KeyChar == 'y')
+			        {
+				        sync.AddWorkLog(entry);
+						Console.Write(" Done");
+			        }
+			        Console.WriteLine();
+		        }
 	        }
         }
 
