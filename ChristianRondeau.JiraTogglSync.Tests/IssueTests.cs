@@ -4,17 +4,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ChristianRondeau.JiraTogglSync.Tests
 {
 	[TestClass]
-	public class WorkLogEntryTests
+	public class IssueTests
 	{
 		[TestMethod]
 		public void CanDisplayNicelyAsString()
 		{
 			Assert.AreEqual(
-				new WorkLogEntry
+				new Issue
 					{
-						Description = "My Entry"
+						Key = "KEY-123",
+						Summary = "My Issue Summary"
 					}.ToString(),
-				"My Entry"
+				"KEY-123: My Issue Summary"
 				);
 		}
 	}

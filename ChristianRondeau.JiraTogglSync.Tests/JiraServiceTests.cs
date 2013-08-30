@@ -4,7 +4,7 @@ using ChristianRondeau.JiraTogglSync.Services;
 
 namespace ChristianRondeau.JiraTogglSync.Tests
 {
-    [TestClass]
+	[TestClass]
     public class JiraServiceTests
     {
         [TestMethod]
