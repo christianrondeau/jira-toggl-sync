@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.20623.1 VSUPREVIEW
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.CommandLine", "ChristianRondeau.JiraTogglSync.CommandLine\ChristianRondeau.JiraTogglSync.CommandLine.csproj", "{DCF69B82-A833-4501-8F81-0BD0AB84652B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.Services", "ChristianRondeau.JiraTogglSync.Services\ChristianRondeau.JiraTogglSync.Services.csproj", "{331AC73B-91AE-4E76-ACC1-3923D0479188}"
@@ -10,6 +8,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChristianRondeau.JiraTogglSync.Tests", "ChristianRondeau.JiraTogglSync.Tests\ChristianRondeau.JiraTogglSync.Tests.csproj", "{CB8EC80D-7194-41E6-B188-18BAA0974631}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl", "Modules\C--Toggl-Api-Client\Toggl\Toggl.csproj", "{AE43A30C-8515-41F2-A018-AA9AE9B80C27}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{854B975B-574A-497F-A0B9-8E08E52D870D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
