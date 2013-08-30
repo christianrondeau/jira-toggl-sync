@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Atlassian.SDK</id>
+    <version>2.3.0</version>
+    <title>Atlassian.SDK</title>
+    <authors>Federico Silva Armas</authors>
+    <owners>Federico Silva Armas</owners>
+    <projectUrl>https://bitbucket.org/farmas/atlassian.net-sdk/wiki/Home</projectUrl>
+    <iconUrl>http://i1207.photobucket.com/albums/bb473/fsilva_armas/AtlassianIcon.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Utilities to interact with Atlassian products. Contains LinqToJira provider for querying JIRA Issue tracker (http://www.atlassian.com/software/jira).</description>
+    <releaseNotes>For change history, visit: https://bitbucket.org/farmas/atlassian.net-sdk/wiki/History</releaseNotes>
+    <copyright />
+    <language />
+    <tags>Atlassian JIRA LINQ</tags>
+  </metadata>
+</package>
