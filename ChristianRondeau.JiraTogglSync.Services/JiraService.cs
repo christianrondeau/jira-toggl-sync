@@ -28,12 +28,7 @@ namespace ChristianRondeau.JiraTogglSync.Services
 
 		public void AddWorkLog(WorkLogEntry entry)
 		{
-			var timeSpent = (entry.Stop - entry.Start);
-			string timeSpentString;
-			if (timeSpent.TotalMinutes > 60)
-				timeSpentString = Math.Round(timeSpent.TotalHours).ToString("0") + "h";
-			else
-				timeSpentString = Math.Max(1, Math.Round(timeSpent.TotalMinutes)).ToString("0") + "m";
+			var timeSpentString = string.Format("{0}m", entry.RoundedDuration.TotalMinutes);
 
 			_jira.GetIssue(entry.IssueKey).AddWorklog(
 				new Worklog(
