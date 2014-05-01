@@ -42,6 +42,8 @@ namespace ChristianRondeau.JiraTogglSync.CommandLine
 					}
 					Console.WriteLine();
 				}
+
+				Console.WriteLine();
 			}
 		}
 

@@ -21,6 +21,8 @@ namespace ChristianRondeau.JiraTogglSync.Services
 
 		public IEnumerable<Issue> LoadIssues(IEnumerable<string> keys)
 		{
+			if (!keys.Any()) return Enumerable.Empty<Issue>();
+
 			return _jira
 				.GetIssuesFromJql(string.Format("key in ({0})", string.Join(",", keys)))
 				.Select(ConvertToIncident);
