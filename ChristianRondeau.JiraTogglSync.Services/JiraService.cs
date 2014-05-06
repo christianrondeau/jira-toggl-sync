@@ -21,6 +21,8 @@ namespace ChristianRondeau.JiraTogglSync.Services
 
 		public IEnumerable<Issue> LoadIssues(IEnumerable<string> keys)
 		{
+			if (!keys.Any()) return Enumerable.Empty<Issue>();
+
 			return _jira
 				.GetIssuesFromJql(string.Format("key in ({0})", string.Join(",", keys)))
 				.Select(ConvertToIncident);
@@ -28,12 +30,7 @@ namespace ChristianRondeau.JiraTogglSync.Services
 
 		public void AddWorkLog(WorkLogEntry entry)
 		{
-			var timeSpent = (entry.Stop - entry.Start);
-			string timeSpentString;
-			if (timeSpent.TotalMinutes > 60)
-				timeSpentString = Math.Round(timeSpent.TotalHours).ToString("0") + "h";
-			else
-				timeSpentString = Math.Max(1, Math.Round(timeSpent.TotalMinutes)).ToString("0") + "m";
+			var timeSpentString = string.Format("{0}m", entry.RoundedDuration.TotalMinutes);
 
 			_jira.GetIssue(entry.IssueKey).AddWorklog(
 				new Worklog(

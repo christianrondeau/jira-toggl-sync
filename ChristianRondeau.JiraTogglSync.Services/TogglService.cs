@@ -33,7 +33,7 @@ namespace ChristianRondeau.JiraTogglSync.Services
 						StartDate = startDate,
 						EndDate = endDate
 					})
-				.Where(w => !string.IsNullOrEmpty(w.Description));
+				.Where(w => !string.IsNullOrEmpty(w.Description) && w.Stop != null);
 
 			return hours.Select(ToWorkLogEntry);
 		}

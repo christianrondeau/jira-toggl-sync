@@ -9,9 +9,26 @@ namespace ChristianRondeau.JiraTogglSync.Services
 		public DateTime Start { get; set; }
 		public DateTime Stop { get; set; }
 
+		public TimeSpan RoundedDuration { get; set; }
+
 		public override string ToString()
 		{
-			return Description;
+			return string.Format("{0:d} - {1} - {2}", Start.Date, RoundedDuration, Description);
+		}
+
+		public void Round()
+		{
+			RoundedDuration = RoundToClosest(Stop - Start, new TimeSpan(0, 0, 15, 0));
+		}
+
+		public static TimeSpan RoundToClosest(TimeSpan input, TimeSpan precision)
+		{
+			if (input < TimeSpan.Zero)
+			{
+				return -RoundToClosest(-input, precision);
+			}
+
+			return new TimeSpan(((input.Ticks + precision.Ticks/2) / precision.Ticks) * precision.Ticks);
 		}
 	}
 }

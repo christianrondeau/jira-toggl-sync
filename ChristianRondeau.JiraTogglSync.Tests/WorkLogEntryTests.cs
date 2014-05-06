@@ -1,4 +1,5 @@
-﻿using ChristianRondeau.JiraTogglSync.Services;
+﻿using System;
+using ChristianRondeau.JiraTogglSync.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ChristianRondeau.JiraTogglSync.Tests
@@ -9,12 +10,13 @@ namespace ChristianRondeau.JiraTogglSync.Tests
 		[TestMethod]
 		public void CanDisplayNicelyAsString()
 		{
-			Assert.AreEqual(
+			Assert.AreEqual("2014-03-25 - 01:30:00 - My Entry",
 				new WorkLogEntry
 					{
-						Description = "My Entry"
-					}.ToString(),
-				"My Entry"
+						Description = "My Entry",
+						Start = new DateTime(2014, 03, 25),
+						RoundedDuration = new TimeSpan(0, 1, 30, 0)
+					}.ToString()
 				);
 		}
 	}
