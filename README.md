@@ -13,6 +13,12 @@ A list of issues will then be shown. You can accept to enter a worklog for it by
 
 Only issues from the last 14 days with a matching JIRA key will be selected.
 
+Contributors
+============
+
+* [Christian Rondeau](https://github.com/christianrondeau)
+* [Dominic St-Jacques](https://github.com/dstj)
+
 Copyright and license
 =====================
 
