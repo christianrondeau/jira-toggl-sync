@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Atlassian.Jira;
 
-namespace ChristianRondeau.JiraTogglSync.Services
+namespace JiraTogglSync.Services
 {
 	public class JiraService : IWorksheetTargetService
     {

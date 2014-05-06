@@ -7,7 +7,7 @@
     <ProjectGuid>{DCF69B82-A833-4501-8F81-0BD0AB84652B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ChristianRondeau.JiraTogglSync.CommandLine</RootNamespace>
+    <RootNamespace>JiraTogglSync.CommandLine</RootNamespace>
     <AssemblyName>jira-toggl-sync</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -46,9 +46,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ChristianRondeau.JiraTogglSync.Services\ChristianRondeau.JiraTogglSync.Services.csproj">
+    <ProjectReference Include="..\JiraTogglSync.Services\JiraTogglSync.Services.csproj">
       <Project>{331ac73b-91ae-4e76-acc1-3923d0479188}</Project>
-      <Name>ChristianRondeau.JiraTogglSync.Services</Name>
+      <Name>JiraTogglSync.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

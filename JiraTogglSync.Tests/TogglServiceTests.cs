@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ChristianRondeau.JiraTogglSync.Services;
+using JiraTogglSync.Services;
 
-namespace ChristianRondeau.JiraTogglSync.Tests
+namespace JiraTogglSync.Tests
 {
     [TestClass]
     public class TogglServiceTests

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ChristianRondeau.JiraTogglSync.Services
+namespace JiraTogglSync.Services
 {
 	public interface IWorksheetTargetService
 	{

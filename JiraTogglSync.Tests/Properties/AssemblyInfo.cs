@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ChristianRondeau.JiraTogglSync.CommandLine")]
+[assembly: AssemblyTitle("JiraTogglSync.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Christian Rondeau")]
-[assembly: AssemblyProduct("ChristianRondeau.JiraTogglSync.CommandLine")]
+[assembly: AssemblyProduct("JiraTogglSync.Tests")]
 [assembly: AssemblyCopyright("Copyright © Christian Rondeau 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0a09922c-a575-41ab-a41b-c39201a1879e")]
+[assembly: Guid("c687732a-155b-4860-9629-1b61358bb54a")]
 
 // Version information for an assembly consists of the following four values:
 //

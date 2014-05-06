@@ -4,11 +4,11 @@ using System.Text;
 using System.Security;
 using System.Security.Cryptography;
 
-namespace ChristianRondeau.JiraTogglSync.CommandLine
+namespace JiraTogglSync.CommandLine
 {
     public class ConfigurationHelper
     {
-        static byte[] entropy = Encoding.Unicode.GetBytes("ChristianRondeau.JiraTogglSync.Salt");
+        static byte[] entropy = Encoding.Unicode.GetBytes("JiraTogglSync.Salt");
 
         public static string GetValueFromConfig(string key, Func<string> askForValue)
         {

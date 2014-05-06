@@ -5,7 +5,7 @@ using Toggl;
 using Toggl.QueryObjects;
 using Toggl.Services;
 
-namespace ChristianRondeau.JiraTogglSync.Services
+namespace JiraTogglSync.Services
 {
 	public class TogglService : IWorksheetSourceService
     {

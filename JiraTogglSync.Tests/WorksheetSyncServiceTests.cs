@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChristianRondeau.JiraTogglSync.Services;
+using JiraTogglSync.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Ploeh.SemanticComparison;
 
-namespace ChristianRondeau.JiraTogglSync.Tests
+namespace JiraTogglSync.Tests
 {
 	[TestClass]
 	public class WorksheetSyncServiceTests

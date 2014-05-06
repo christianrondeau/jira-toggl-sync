@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using ChristianRondeau.JiraTogglSync.Services;
+using JiraTogglSync.Services;
 
-namespace ChristianRondeau.JiraTogglSync.CommandLine
+namespace JiraTogglSync.CommandLine
 {
 	class Program
 	{

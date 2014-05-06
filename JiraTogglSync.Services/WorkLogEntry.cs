@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ChristianRondeau.JiraTogglSync.Services
+namespace JiraTogglSync.Services
 {
 	public class WorkLogEntry
 	{

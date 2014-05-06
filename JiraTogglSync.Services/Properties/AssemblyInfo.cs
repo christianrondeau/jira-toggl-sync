@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ChristianRondeau.JiraTogglSync.Services")]
+[assembly: AssemblyTitle("JiraTogglSync.Services")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Christian Rondeau")]
-[assembly: AssemblyProduct("ChristianRondeau.JiraTogglSync.Services")]
+[assembly: AssemblyProduct("JiraTogglSync.Services")]
 [assembly: AssemblyCopyright("Copyright © Christian Rondeau 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

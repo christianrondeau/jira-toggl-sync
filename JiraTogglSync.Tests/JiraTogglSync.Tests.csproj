@@ -6,8 +6,8 @@
     <ProjectGuid>{CB8EC80D-7194-41E6-B188-18BAA0974631}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ChristianRondeau.JiraTogglSync.Tests</RootNamespace>
-    <AssemblyName>ChristianRondeau.JiraTogglSync.Tests</AssemblyName>
+    <RootNamespace>JiraTogglSync.Tests</RootNamespace>
+    <AssemblyName>JiraTogglSync.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -37,11 +37,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NSubstitute">
-      <HintPath>..\packages\NSubstitute.1.6.1.0\lib\NET40\NSubstitute.dll</HintPath>
+    <Reference Include="NSubstitute, Version=1.7.2.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NSubstitute.1.7.2.0\lib\NET45\NSubstitute.dll</HintPath>
     </Reference>
-    <Reference Include="Ploeh.SemanticComparison">
-      <HintPath>..\packages\SemanticComparison.3.6.6\lib\net40\Ploeh.SemanticComparison.dll</HintPath>
+    <Reference Include="Ploeh.SemanticComparison, Version=3.18.5.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\SemanticComparison.3.18.5\lib\net40\Ploeh.SemanticComparison.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
@@ -66,9 +68,9 @@
     <Compile Include="WorksheetSyncServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ChristianRondeau.JiraTogglSync.Services\ChristianRondeau.JiraTogglSync.Services.csproj">
+    <ProjectReference Include="..\JiraTogglSync.Services\JiraTogglSync.Services.csproj">
       <Project>{331ac73b-91ae-4e76-acc1-3923d0479188}</Project>
-      <Name>ChristianRondeau.JiraTogglSync.Services</Name>
+      <Name>JiraTogglSync.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
