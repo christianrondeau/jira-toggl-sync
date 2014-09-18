@@ -29,7 +29,16 @@ namespace JiraTogglSync.CommandLine
             var value = ConfigurationManager.AppSettings[key];
 
             if (value != null)
-                return DecryptString(value);
+            {
+                try
+                {
+                    return DecryptString(value);
+                }
+                catch (CryptographicException ex)
+                {
+                    throw new ApplicationException(string.Format("Cannot decrypt App.config's '{0}' value. Delete it and relaunch the app.", key), ex);
+                }
+            }
 
             value = askForValue();
 
