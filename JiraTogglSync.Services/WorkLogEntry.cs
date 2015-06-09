@@ -16,12 +16,12 @@ namespace JiraTogglSync.Services
 			return string.Format("{0:d} - {1} - {2}", Start.Date, RoundedDuration, Description);
 		}
 
-		public void Round()
+		public void Round(int nbMinutes)
 		{
-			RoundedDuration = RoundToClosest(Stop - Start, new TimeSpan(0, 0, 15, 0));
+			RoundedDuration = RoundToClosest(Stop - Start, new TimeSpan(0, 0, nbMinutes, 0));
 		}
 
-		public static TimeSpan RoundToClosest(TimeSpan input, TimeSpan precision)
+		private static TimeSpan RoundToClosest(TimeSpan input, TimeSpan precision)
 		{
 			if (input < TimeSpan.Zero)
 			{
