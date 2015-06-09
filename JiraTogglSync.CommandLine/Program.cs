@@ -20,11 +20,12 @@ namespace JiraTogglSync.CommandLine
 			Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
 
 			var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
+			var roundingToMinutes = int.Parse(ConfigurationHelper.GetValueFromConfig("roundingToMinutes", () => AskFor("Round duration to X minutes")));
 
 			var sync = new WorksheetSyncService(toggl, jira, jiraKeyPrefixes.Split(','));
 
 			var suggestions = sync.GetSuggestions(DateTime.Now.Date.AddDays(-syncDays), DateTime.Now).ToList();
-			suggestions.ForEach(x => x.WorkLog.ForEach(y => y.Round()));
+			suggestions.ForEach(x => x.WorkLog.ForEach(y => y.Round(roundingToMinutes)));
 
 			foreach (var issue in suggestions)
 			{
