@@ -10,7 +10,7 @@ namespace JiraTogglSync.Tests
         [TestMethod]
         public void CanBeCreated()
         {
-            new JiraService("https://atlassian.net", "christianrondeau", "mypassword");
+            new JiraService("https://atlassian.net", "christianrondeau", "mypassword", "RetainRemainingEstimate");
         }
     }
 }

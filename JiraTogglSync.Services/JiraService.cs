@@ -7,14 +7,18 @@ namespace JiraTogglSync.Services
 {
 	public class JiraService : IWorksheetTargetService
     {
-        private readonly Jira _jira;
+		private readonly Jira _jira;
+		private readonly WorklogStrategy _worklogStrategy;
 
-        public JiraService(string instance, string username, string password)
+		public JiraService(string instance, string username, string password, string worklogStrategy)
         {
-            _jira = new Jira(instance, username, password);
+	        _jira = new Jira(instance, username, password);
+
+			if (!Enum.TryParse(worklogStrategy, out _worklogStrategy))
+				_worklogStrategy = WorklogStrategy.RetainRemainingEstimate;
         }
 
-        public string GetUserInformation()
+		public string GetUserInformation()
         {
             return _jira.Url;
         }
@@ -38,7 +42,7 @@ namespace JiraTogglSync.Services
 					entry.Start,
 					entry.Description
 					),
-					WorklogStrategy.RetainRemainingEstimate
+					_worklogStrategy
 				);
 		}
 
