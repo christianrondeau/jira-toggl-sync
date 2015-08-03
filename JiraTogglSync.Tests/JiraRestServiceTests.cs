@@ -5,12 +5,12 @@ using JiraTogglSync.Services;
 namespace JiraTogglSync.Tests
 {
 	[TestClass]
-    public class JiraServiceTests
+    public class JiraRestServiceTests
     {
         [TestMethod]
         public void CanBeCreated()
         {
-            new JiraService("https://atlassian.net", "christianrondeau", "mypassword", "RetainRemainingEstimate");
+            new JiraRestService("https://atlassian.net", "christianrondeau", "mypassword", "RetainRemainingEstimate");
         }
     }
 }

@@ -17,7 +17,7 @@ namespace JiraTogglSync.CommandLine
 			var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
 			var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
 			var jiraWorklogStrategy = ConfigurationHelper.GetValueFromConfig("jira-worklogStrategy", () => AskFor("JIRA Worklog strategy (AutoAdjustRemainingEstimate, RetainRemainingEstimate (default))"));
-			var jira = new JiraService(jiraInstance, jiraUsername, jiraPassword, jiraWorklogStrategy);
+			var jira = new JiraRestService(jiraInstance, jiraUsername, jiraPassword, jiraWorklogStrategy);
 			Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
 
 			var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));

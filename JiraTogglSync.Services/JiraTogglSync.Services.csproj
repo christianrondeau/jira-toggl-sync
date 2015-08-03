@@ -37,19 +37,21 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Atlassian.Jira, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Atlassian.SDK.2.5.0\lib\Atlassian.Jira.dll</HintPath>
+    <Reference Include="RestSharp">
+      <HintPath>..\packages\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="TechTalk.JiraRestClient">
+      <HintPath>..\..\JiraRestClient\TechTalk.JiraRestClient\bin\Debug\TechTalk.JiraRestClient.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Issue.cs" />
     <Compile Include="IWorksheetSourceService.cs" />
     <Compile Include="IWorksheetTargetService.cs" />
+    <Compile Include="JiraRestService..cs" />
     <Compile Include="TogglService.cs" />
-    <Compile Include="JiraService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkLogEntry.cs" />
     <Compile Include="WorksheetSyncService.cs" />
