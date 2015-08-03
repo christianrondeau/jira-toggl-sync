@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.30110.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTogglSync.CommandLine", "JiraTogglSync.CommandLine\JiraTogglSync.CommandLine.csproj", "{DCF69B82-A833-4501-8F81-0BD0AB84652B}"
 EndProject
@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{854B97
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechTalk.JiraRestClient", "D:\Dev\github\jira-toggl-sync\Modules\JiraRestClient\TechTalk.JiraRestClient\TechTalk.JiraRestClient.csproj", "{210529FA-454E-4C32-A2C8-353ECBD4DA05}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SubModules", "SubModules", "{E7788C55-2F1A-482B-B320-E08CCE616F12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,8 +72,22 @@ Global
 		{AE43A30C-8515-41F2-A018-AA9AE9B80C27}.Release|Mixed Platforms.Build.0 = Release|x86
 		{AE43A30C-8515-41F2-A018-AA9AE9B80C27}.Release|x86.ActiveCfg = Release|x86
 		{AE43A30C-8515-41F2-A018-AA9AE9B80C27}.Release|x86.Build.0 = Release|x86
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AE43A30C-8515-41F2-A018-AA9AE9B80C27} = {E7788C55-2F1A-482B-B320-E08CCE616F12}
+		{210529FA-454E-4C32-A2C8-353ECBD4DA05} = {E7788C55-2F1A-482B-B320-E08CCE616F12}
 	EndGlobalSection
 EndGlobal
