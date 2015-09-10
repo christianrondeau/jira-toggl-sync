@@ -25,7 +25,7 @@ namespace JiraTogglSync.CommandLine
 
 			var sync = new WorksheetSyncService(toggl, jira, jiraKeyPrefixes.Split(','));
 
-			var suggestions = sync.GetSuggestions(DateTime.Now.Date.AddDays(-syncDays), DateTime.Now).ToList();
+			var suggestions = sync.GetSuggestions(DateTime.Now.Date.AddDays(-syncDays), DateTime.Now.Date.AddDays(1)).ToList();
 			suggestions.ForEach(x => x.WorkLog.ForEach(y => y.Round(roundingToMinutes)));
 
 			foreach (var issue in suggestions)
