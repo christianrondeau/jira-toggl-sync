@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using TechTalk.JiraRestClient;
 
 namespace JiraTogglSync.Services
 {
@@ -21,24 +22,31 @@ namespace JiraTogglSync.Services
 
 		public IEnumerable<Issue> GetSuggestions(DateTime fromDate, DateTime toDate)
 		{
-			var sourceEntries = _source.GetEntries(fromDate, toDate).ToList();
-
-			foreach (var entry in sourceEntries)
+			try
 			{
-				entry.IssueKey = ExtractJiraIncidentNumber(entry.Description);
-				entry.Description = RemoveIncidentNumber(entry.Description, entry.IssueKey);
+				var sourceEntries = _source.GetEntries(fromDate, toDate).ToList();
+
+				foreach (var entry in sourceEntries)
+				{
+					entry.IssueKey = ExtractJiraIncidentNumber(entry.Description);
+					entry.Description = RemoveIncidentNumber(entry.Description, entry.IssueKey);
+				}
+
+				var validEntries = sourceEntries.Where(entry => entry.IssueKey != null);
+
+				var issues = _target.LoadIssues(validEntries.Select(entry => entry.IssueKey).Distinct()).ToList();
+
+				foreach (var issue in issues)
+				{
+					issue.WorkLog.AddRange(sourceEntries.Where(entry => entry.IssueKey == issue.Key));
+				}
+
+				return issues;
 			}
-
-			var validEntries = sourceEntries.Where(entry => entry.IssueKey != null);
-
-			var issues = _target.LoadIssues(validEntries.Select(entry => entry.IssueKey).Distinct()).ToList();
-
-			foreach (var issue in issues)
+			catch (JiraClientException ex)
 			{
-				issue.WorkLog.AddRange(sourceEntries.Where(entry => entry.IssueKey == issue.Key));
+				throw new Exception(string.Format("{0}\n{1}", ex.Message, ex.ErrorResponse));
 			}
-			
-			return issues;
 		}
 
 		private static string RemoveIncidentNumber(string description, string issueKey)
