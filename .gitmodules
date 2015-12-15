@@ -4,5 +4,5 @@
 	branch = master
 [submodule "Modules/JiraRestClient"]
 	path = Modules/JiraRestClient
-	url = git@github.com:dstj/JiraRestClient.git
+	url = https://github.com/dstj/JiraRestClient.git
 	branch = master
