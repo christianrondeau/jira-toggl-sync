@@ -37,9 +37,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Atlassian.Jira">
-      <HintPath>..\packages\Atlassian.SDK.2.3.0\lib\Atlassian.Jira.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
@@ -47,20 +44,23 @@
     <Compile Include="Issue.cs" />
     <Compile Include="IWorksheetSourceService.cs" />
     <Compile Include="IWorksheetTargetService.cs" />
+    <Compile Include="JiraRestService..cs" />
     <Compile Include="TogglService.cs" />
-    <Compile Include="JiraService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkLogEntry.cs" />
     <Compile Include="WorksheetSyncService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Modules\C--Toggl-Api-Client\Toggl\Toggl.csproj">
       <Project>{ae43a30c-8515-41f2-a018-aa9ae9b80c27}</Project>
       <Name>Toggl</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Dev\github\jira-toggl-sync\Modules\JiraRestClient\TechTalk.JiraRestClient\TechTalk.JiraRestClient.csproj">
+      <Project>{210529fa-454e-4c32-a2c8-353ecbd4da05}</Project>
+      <Name>TechTalk.JiraRestClient</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

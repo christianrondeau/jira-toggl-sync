@@ -62,7 +62,7 @@
   <ItemGroup>
     <Compile Include="IssueTests.cs" />
     <Compile Include="TogglServiceTests.cs" />
-    <Compile Include="JiraServiceTests.cs" />
+    <Compile Include="JiraRestServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkLogEntryTests.cs" />
     <Compile Include="WorksheetSyncServiceTests.cs" />
