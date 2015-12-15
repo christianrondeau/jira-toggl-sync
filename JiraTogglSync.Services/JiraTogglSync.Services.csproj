@@ -58,7 +58,7 @@
       <Project>{ae43a30c-8515-41f2-a018-aa9ae9b80c27}</Project>
       <Name>Toggl</Name>
     </ProjectReference>
-    <ProjectReference Include="D:\Dev\github\jira-toggl-sync\Modules\JiraRestClient\TechTalk.JiraRestClient\TechTalk.JiraRestClient.csproj">
+    <ProjectReference Include="..\Modules\JiraRestClient\TechTalk.JiraRestClient\TechTalk.JiraRestClient.csproj">
       <Project>{210529fa-454e-4c32-a2c8-353ecbd4da05}</Project>
       <Name>TechTalk.JiraRestClient</Name>
     </ProjectReference>
