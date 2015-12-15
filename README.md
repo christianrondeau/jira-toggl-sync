@@ -1,5 +1,7 @@
-jira-toggl-sync (BETA)
-=======================
+jira-toggl-sync
+===============
+
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/fg2po52e24qj2bc9?svg=true)](https://ci.appveyor.com/project/christianrondeau/jira-toggl-sync)
 
 A simple tool to synchronize Toggl time entries into Atlassian JIRA's work log entries
 
