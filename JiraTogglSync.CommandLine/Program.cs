@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using JiraTogglSync.Services;
+using System.Collections.Generic;
 
 namespace JiraTogglSync.CommandLine
 {
@@ -28,6 +29,7 @@ namespace JiraTogglSync.CommandLine
 			var suggestions = sync.GetSuggestions(DateTime.Now.Date.AddDays(-syncDays), DateTime.Now.Date.AddDays(1)).ToList();
 			suggestions.ForEach(x => x.WorkLog.ForEach(y => y.Round(roundingToMinutes)));
 
+			var entriesToSync = new List<WorkLogEntry>();
 			foreach (var issue in suggestions)
 			{
 				var issueTitle = issue.ToString();
@@ -39,13 +41,22 @@ namespace JiraTogglSync.CommandLine
 					Console.Write(entry + " (y/n)");
 					if (Console.ReadKey(true).KeyChar == 'y')
 					{
-						sync.AddWorkLog(entry);
+						entriesToSync.Add(entry);
 						Console.Write(" Done");
 					}
 					Console.WriteLine();
 				}
 
 				Console.WriteLine();
+			}
+			if(!entriesToSync.Any()) return;
+			
+			Console.WriteLine();
+			Console.Write("Send to Jira? (y/n)");
+			if (Console.ReadKey(true).KeyChar == 'y')
+			{
+				foreach (var entry in entriesToSync)
+					sync.AddWorkLog(entry);
 			}
 		}
 
