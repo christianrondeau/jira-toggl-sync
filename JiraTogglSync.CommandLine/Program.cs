@@ -10,7 +10,19 @@ namespace JiraTogglSync.CommandLine
 		static void Main(string[] args)
 		{
 			var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
-			var toggl = new TogglService(togglApiKey);
+			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig("jira-decription-template", 
+                                                                                        () => AskFor("JIRA Description template"), 
+                                                                                        defaultValue: () => "{{toggl:id}}\r\n{{toggl:description}}",
+                                                                                        isValueValid: v =>
+                                                                                        {
+                                                                                            if (v.Contains("{{toggl:id}}"))
+                                                                                                return true;
+
+                                                                                            Console.WriteLine("Error: Template must contain placeholder for toggl time entry id: {{toggl:id}}");
+                                                                                            return false;
+                                                                                        });
+
+            var toggl = new TogglService(togglApiKey, jiraWorkItemDescriptionTemplate);
 			Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
 
 			var jiraInstance = ConfigurationHelper.GetValueFromConfig("jira-instance", () => AskFor("JIRA Instance"));
