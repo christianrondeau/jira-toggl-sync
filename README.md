@@ -15,6 +15,23 @@ A list of issues will then be shown. You can accept to enter a worklog for it by
 
 Only issues from the last 14 days with a matching JIRA key will be selected.
 
+Parameters
+============
+### jira-decription-template
+When Toggl's time entry is converted to JIRA's work log entry, additional information from toggl time entry can be stored in JIRA's work log comment.
+
+Following placeholders that can be used in template:
+- **{{toggl:id}}** - Required to be present somewhere in the template
+- **{{toggl:description}}**
+- **{{toggl:createdWith}}**
+- **{{toggl:isBillable}}**
+- **{{toggl:projectId}}**
+- **{{toggl:tagNames}}**
+- **{{toggl:taskId}}**
+- **{{toggl:updatedOn}}**
+
+Default placeholder: `{{toggl:id}}\r\n{{toggl:description}}`
+
 Contributors
 ============
 

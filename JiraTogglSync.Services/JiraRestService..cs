@@ -28,7 +28,7 @@ namespace JiraTogglSync.Services
 		{
 			var timeSpentSeconds = (int)entry.RoundedDuration.TotalSeconds;
 
-			_jira.CreateWorklog(new IssueRef {id = entry.IssueKey}, timeSpentSeconds, "", entry.Start);
+			_jira.CreateWorklog(new IssueRef {id = entry.IssueKey}, timeSpentSeconds, entry.Description, entry.Start);
 		}
 
 		private static Issue ConvertToIncident(Issue<IssueFields> issue)
