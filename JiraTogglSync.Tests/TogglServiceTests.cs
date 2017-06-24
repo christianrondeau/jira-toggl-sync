@@ -10,7 +10,7 @@ namespace JiraTogglSync.Tests
         [TestMethod]
         public void CanBeCreated()
         {
-            new TogglService("my-api-key", decriptionTemplate: "");
+            new TogglService("my-api-key", descriptionTemplate: "");
         }
     }
 }

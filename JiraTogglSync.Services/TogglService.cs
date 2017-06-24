@@ -11,15 +11,15 @@ namespace JiraTogglSync.Services
 	public class TogglService : IWorksheetSourceService
     {
         private readonly string _apiKey;
-        private readonly string _decriptionTemplate;
+        private readonly string _descriptionTemplate;
 
-        public TogglService(string apiKey, string decriptionTemplate)
+        public TogglService(string apiKey, string descriptionTemplate)
         {
-            if (apiKey == null) throw new ArgumentNullException(nameof(apiKey));
-            if (decriptionTemplate == null) throw new ArgumentNullException(nameof(decriptionTemplate));
+            if (apiKey == null) throw new ArgumentNullException("apiKey");
+            if (descriptionTemplate == null) throw new ArgumentNullException("descriptionTemplate");
 
             _apiKey = apiKey;
-            _decriptionTemplate = decriptionTemplate;
+            _descriptionTemplate = descriptionTemplate;
         }
 
         public string GetUserInformation()
@@ -41,7 +41,7 @@ namespace JiraTogglSync.Services
 					})
 				.Where(w => !string.IsNullOrEmpty(w.Description) && w.Stop != null);
 
-			return hours.Select(h => ToWorkLogEntry(h, _decriptionTemplate));
+			return hours.Select(h => ToWorkLogEntry(h, _descriptionTemplate));
 		}
 
 		private WorkLogEntry ToWorkLogEntry(TimeEntry arg, string descriptionTemplate)
