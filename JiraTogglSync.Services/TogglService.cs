@@ -44,26 +44,26 @@ namespace JiraTogglSync.Services
 			return hours.Select(h => ToWorkLogEntry(h, _decriptionTemplate));
 		}
 
-		private WorkLogEntry ToWorkLogEntry(TimeEntry arg, string desrciptionTemplate)
+		private WorkLogEntry ToWorkLogEntry(TimeEntry arg, string descriptionTemplate)
 		{
 			return new WorkLogEntry
 				{
 					Start = DateTime.Parse(arg.Start),
 					Stop = DateTime.Parse(arg.Stop),
-					Description = CreateDescription(arg, desrciptionTemplate) 
+					Description = CreateDescription(arg, descriptionTemplate) 
 				};
 		}
 
         public static string CreateDescription(TimeEntry timeEntry, string descriptionTemplate)
         {
-            var result = descriptionTemplate.Replace("{{toggl:id}}", $"[toggl-id:{timeEntry.Id}]")
+            var result = descriptionTemplate.Replace("{{toggl:id}}", string.Format("[toggl-id:{0}]", timeEntry.Id))
                                             .Replace("{{toggl:description}}", timeEntry.Description)
                                             .Replace("{{toggl:createdWith}}", timeEntry.CreatedWith)
-                                            .Replace("{{toggl:isBillable}}", timeEntry.IsBillable.ToString())
-                                            .Replace("{{toggl:projectId}}", timeEntry.ProjectId.ToString())
+                                            .Replace("{{toggl:isBillable}}", timeEntry.IsBillable?.ToString()??"")
+                                            .Replace("{{toggl:projectId}}", timeEntry.ProjectId?.ToString()??"")
                                             .Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.TagNames ?? Enumerable.Empty<string>()))
-                                            .Replace("{{toggl:taskId}}", timeEntry.TaskId.ToString())
-                                            .Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn.ToString());
+                                            .Replace("{{toggl:taskId}}", timeEntry.TaskId?.ToString()??"")
+                                            .Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn?.ToString()??"");
 
             return result;
 

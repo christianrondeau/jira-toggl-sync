@@ -10,7 +10,7 @@ namespace JiraTogglSync.CommandLine
     {
         static byte[] entropy = Encoding.Unicode.GetBytes("JiraTogglSync.Salt");
 
-        public static string GetValueFromConfig(string key, Func<string> askForValue, Func<string> defaultValue = null, Func<string,bool> isValueValid = null)
+        public static string GetValueFromConfig(string key, Func<string> askForValue, string defaultValue = null, Func<string,bool> isValueValid = null)
         {
             var value = ConfigurationManager.AppSettings[key];
 
@@ -29,12 +29,12 @@ namespace JiraTogglSync.CommandLine
             return value;
         }
 
-        private static string AskForValueOrUseDefault(Func<string> askForValue, Func<string> defaultValue)
+        private static string AskForValueOrUseDefault(Func<string> askForValue, string defaultValue)
         {
             var value = askForValue();
 
-            if (string.IsNullOrEmpty(value) && defaultValue != null)
-                value = defaultValue();
+            if (string.IsNullOrEmpty(value) )
+                value = defaultValue ?? "";
 
             return value;
         }
