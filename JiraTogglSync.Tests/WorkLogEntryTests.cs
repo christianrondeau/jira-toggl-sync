@@ -1,13 +1,12 @@
 ﻿using System;
 using JiraTogglSync.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace JiraTogglSync.Tests
 {
-	[TestClass]
 	public class WorkLogEntryTests
 	{
-		[TestMethod]
+		[Test]
 		public void CanDisplayNicelyAsString()
 		{
 			Assert.AreEqual("3/25/2014 - 01:30:00 - My Entry",
@@ -20,7 +19,7 @@ namespace JiraTogglSync.Tests
 				);
 		}
 
-		[TestMethod]
+		[Test]
 		public void CanRound()
 		{
 			var workLogEntry = new WorkLogEntry

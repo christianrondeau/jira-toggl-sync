@@ -1,16 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using JiraTogglSync.Services;
+using NUnit.Framework;
 
 namespace JiraTogglSync.Tests
 {
-    [TestClass]
     public class TogglServiceTests
     {
-        [TestMethod]
+        [Test]
         public void CanBeCreated()
         {
-            new TogglService("my-api-key", descriptionTemplate: "");
+            new TogglRepository("my-api-key", descriptionTemplate: "");
         }
     }
 }

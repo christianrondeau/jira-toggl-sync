@@ -2,24 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using JiraTogglSync.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NUnit.Framework;
 using Ploeh.SemanticComparison;
 
 namespace JiraTogglSync.Tests
 {
-	[TestClass]
 	public class WorksheetSyncServiceTests
 	{
-		[TestMethod]
+		[Test]
 		public void CanGetUniqueJiraIncidentsFromWorkLogEntries()
 		{
-			var source = Substitute.For<IWorksheetSourceService>();
+			var source = Substitute.For<IExternalWorksheetRepository>();
 			source
-				.GetEntries(new DateTime(2010, 01, 01), new DateTime(2010, 01, 14))
+				.GetEntries(new DateTime(2010, 01, 01), new DateTime(2010, 01, 14), Arg.Any<List<string>>())
 				.Returns(new[] {new WorkLogEntry {Description = "KEY-123: This is some stuff I'm doing"}});
 
-			var target = Substitute.For<IWorksheetTargetService>();
+			var target = Substitute.For<IJiraRepository>();
 			target
 				.LoadIssues(Arg.Any<IEnumerable<string>>())
 				.Returns(new[] { new Issue { Key = "KEY-123", Summary = "Create the new gizmo" } });

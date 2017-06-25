@@ -1,13 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using JiraTogglSync.Services;
+using NUnit.Framework;
 
 namespace JiraTogglSync.Tests
 {
-	[TestClass]
     public class JiraRestServiceTests
     {
-        [TestMethod]
+        [Test]
         public void CanBeCreated()
         {
             new JiraRestService("https://atlassian.net", "christianrondeau", "mypassword", "RetainRemainingEstimate");
