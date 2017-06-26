@@ -12,13 +12,13 @@ namespace JiraTogglSync.Tests
 		[TestInitialize]
 		public void GivenEnUsCulture()
 		{
-			Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
+			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
 
 		[TestMethod]
 		public void CanDisplayNicelyAsString()
 		{
-			Assert.AreEqual("2014-03-25 - 01:30:00 - My Entry",
+			Assert.AreEqual("03/25/2014 - 01:30:00 - My Entry",
 				new WorkLogEntry
 				{
 					Description = "My Entry",
@@ -33,13 +33,13 @@ namespace JiraTogglSync.Tests
 			var workLogEntry = new WorkLogEntry
 			{
 				Description = "My Entry",
-				Start = new DateTime(2014, 03, 25, 12, 34, 53),
-				Stop = new DateTime(2014, 03, 25, 13, 21, 27),
+				Start = new DateTime(2014, 03, 01, 12, 34, 53),
+				Stop = new DateTime(2014, 03, 01, 13, 21, 27),
 			};
 
 			workLogEntry.Round(7);
 
-			Assert.AreEqual("2014-03-25 - 00:49:00 - My Entry",
+			Assert.AreEqual("03/01/2014 - 00:49:00 - My Entry",
 				workLogEntry.ToString());
 		}
 	}
