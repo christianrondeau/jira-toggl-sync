@@ -4,7 +4,6 @@ using System.Linq;
 using JiraTogglSync.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Ploeh.SemanticComparison;
 
 namespace JiraTogglSync.Tests
 {
@@ -17,11 +16,11 @@ namespace JiraTogglSync.Tests
 			var source = Substitute.For<IWorksheetSourceService>();
 			source
 				.GetEntries(new DateTime(2010, 01, 01), new DateTime(2010, 01, 14))
-				.Returns(new[] {new WorkLogEntry {Description = "KEY-123: This is some stuff I'm doing"}});
+				.Returns(new[] { new WorkLogEntry { Description = "KEY-123: This is some stuff I'm doing" } });
 
 			var target = Substitute.For<IWorksheetTargetService>();
 			target
-				.LoadIssues(Arg.Any<IEnumerable<string>>())
+				.LoadIssues(Arg.Is<IEnumerable<string>>(value => value.Single() == "KEY-123"))
 				.Returns(new[] { new Issue { Key = "KEY-123", Summary = "Create the new gizmo" } });
 
 			var service = new WorksheetSyncService(source, target, new[] { "KEY" });

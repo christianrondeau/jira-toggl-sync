@@ -2,15 +2,14 @@
 using System.Linq;
 using JiraTogglSync.Services;
 using System.Collections.Generic;
-using System.Security.Policy;
 
 namespace JiraTogglSync.CommandLine
 {
-	class Program
+	public class Program
 	{
 		private const string DefaultDescriptionTemplate = "{{toggl:id}}: {{toggl:description}}";
 
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
 			var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
 			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig(
@@ -46,8 +45,7 @@ namespace JiraTogglSync.CommandLine
 			var jiraUsername = ConfigurationHelper.GetValueFromConfig("jira-username", () => AskFor("JIRA Username"));
 			var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
 			var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
-			var jiraWorklogStrategy = ConfigurationHelper.GetValueFromConfig("jira-worklogStrategy", () => AskFor("JIRA Worklog strategy (AutoAdjustRemainingEstimate, RetainRemainingEstimate (default))"));
-			var jira = new JiraRestService(jiraInstance, jiraUsername, jiraPassword, jiraWorklogStrategy);
+			var jira = new JiraRestService(jiraInstance, jiraUsername, jiraPassword);
 			Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
 
 			var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
@@ -63,7 +61,7 @@ namespace JiraTogglSync.CommandLine
 			{
 				var issueTitle = issue.ToString();
 				Console.WriteLine(issueTitle);
-				Console.WriteLine(new String('=', issueTitle.Length));
+				Console.WriteLine(new string('=', issueTitle.Length));
 
 				foreach (var entry in issue.WorkLog.Where(entry => entry.RoundedDuration.Ticks > 0))
 				{
@@ -82,6 +80,7 @@ namespace JiraTogglSync.CommandLine
 
 			Console.WriteLine();
 			Console.Write("Send to Jira? (y/n)");
+
 			if (Console.ReadKey(true).KeyChar == 'y')
 			{
 				foreach (var entry in entriesToSync)
