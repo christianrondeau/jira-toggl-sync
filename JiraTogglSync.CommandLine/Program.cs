@@ -9,17 +9,16 @@ namespace JiraTogglSync.CommandLine
 	{
 		static void Main(string[] args)
 		{
-		    var purge = false; //for now purge is not supported
             var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
 			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig("jira-decription-template", 
                                                                                         () => AskFor("JIRA Description template (leave blank to use Default)"), 
                                                                                         defaultValue: "{{toggl:id}}\r\n{{toggl:description}}",
                                                                                         isValueValid: v =>
                                                                                         {
-                                                                                            if (!purge || v.Contains("{{toggl:id}}"))
+                                                                                            if (v.Contains("{{toggl:id}}"))
                                                                                                 return true;
 
-                                                                                            Console.WriteLine("Error: When purge is enabled template must contain placeholder for toggl time entry id: {{toggl:id}}");
+                                                                                            Console.WriteLine("Error:Template must contain placeholder for toggl time entry id: {{toggl:id}}");
                                                                                             return false;
                                                                                         });
 
