@@ -2,30 +2,47 @@
 using System.Linq;
 using JiraTogglSync.Services;
 using System.Collections.Generic;
+using System.Security.Policy;
 
 namespace JiraTogglSync.CommandLine
 {
 	class Program
 	{
+		private const string DefaultDescriptionTemplate = "{{toggl:id}}: {{toggl:description}}";
+
 		static void Main(string[] args)
 		{
-            var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
-			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig("jira-decription-template", 
-                                                                                        () => AskFor("JIRA Description template (leave blank to use Default)"), 
-                                                                                        defaultValue: "{{toggl:id}}\r\n{{toggl:description}}",
-                                                                                        isValueValid: v =>
-                                                                                        {
-                                                                                            if (v.Contains("{{toggl:id}}"))
-                                                                                                return true;
+			var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
+			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig(
+				"jira-decription-template",
+				() => AskFor($"JIRA Description template (default: '{DefaultDescriptionTemplate}')"),
+				DefaultDescriptionTemplate,
+				v =>
+				{
+					if (v.Contains("{{toggl:id}}"))
+						return true;
 
-                                                                                            Console.WriteLine("Error:Template must contain placeholder for toggl time entry id: {{toggl:id}}");
-                                                                                            return false;
-                                                                                        });
+					Console.Error.WriteLine("Error: Template must contain placeholder for toggl time entry id: {{toggl:id}}");
+					return false;
+				});
 
-            var toggl = new TogglService(togglApiKey, jiraWorkItemDescriptionTemplate);
+			var toggl = new TogglService(togglApiKey, jiraWorkItemDescriptionTemplate);
 			Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
 
-			var jiraInstance = ConfigurationHelper.GetValueFromConfig("jira-instance", () => AskFor("JIRA Instance"));
+			var jiraInstance = ConfigurationHelper.GetValueFromConfig(
+				"jira-instance",
+				() => AskFor("JIRA Instance"),
+				null,
+				value =>
+				{
+					Uri url;
+					if (Uri.TryCreate(value, UriKind.Absolute, out url))
+						return true;
+
+					Console.Error.WriteLine("Error: The JIRA instance must be a valid HTTP address (e.g. https://(yourcompany).atlassian.net)");
+					return false;
+				});
+
 			var jiraUsername = ConfigurationHelper.GetValueFromConfig("jira-username", () => AskFor("JIRA Username"));
 			var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
 			var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
@@ -61,8 +78,8 @@ namespace JiraTogglSync.CommandLine
 
 				Console.WriteLine();
 			}
-			if(!entriesToSync.Any()) return;
-			
+			if (!entriesToSync.Any()) return;
+
 			Console.WriteLine();
 			Console.Write("Send to Jira? (y/n)");
 			if (Console.ReadKey(true).KeyChar == 'y')
