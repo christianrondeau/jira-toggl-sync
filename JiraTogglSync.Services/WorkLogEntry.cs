@@ -13,7 +13,7 @@ namespace JiraTogglSync.Services
 
 		public override string ToString()
 		{
-			return string.Format("{0:d} - {1} - {2}", Start.Date, RoundedDuration, Description);
+			return $"{Start:d} - {RoundedDuration} - {Description}";
 		}
 
 		public void Round(int nbMinutes)
@@ -33,7 +33,7 @@ namespace JiraTogglSync.Services
 				return -RoundToClosest(-input, precision);
 			}
 
-			return new TimeSpan(((input.Ticks + precision.Ticks/2) / precision.Ticks) * precision.Ticks);
+			return new TimeSpan(((input.Ticks + precision.Ticks / 2) / precision.Ticks) * precision.Ticks);
 		}
 	}
 }

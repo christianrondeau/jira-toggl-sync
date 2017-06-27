@@ -10,7 +10,7 @@ namespace JiraTogglSync.Services
 		
 		private readonly IJiraClient<IssueFields> _jira;
 
-		public JiraRestService(string instance, string username, string password, string worklogStrategy)
+		public JiraRestService(string instance, string username, string password)
         {
 	        _jira = new JiraClient<IssueFields>(instance, username, password);
         }

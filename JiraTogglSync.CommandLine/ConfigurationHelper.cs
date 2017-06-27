@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Configuration;
 using System.Text;
-using System.Security;
 using System.Security.Cryptography;
 
 namespace JiraTogglSync.CommandLine
 {
     public class ConfigurationHelper
     {
-        static byte[] entropy = Encoding.Unicode.GetBytes("JiraTogglSync.Salt");
+	    private static readonly byte[] Entropy = Encoding.Unicode.GetBytes("JiraTogglSync.Salt");
 
         public static string GetValueFromConfig(string key, Func<string> askForValue, string defaultValue = null, Func<string,bool> isValueValid = null)
         {
@@ -51,7 +50,7 @@ namespace JiraTogglSync.CommandLine
                 }
                 catch (CryptographicException ex)
                 {
-                    throw new ApplicationException(string.Format("Cannot decrypt App.config's '{0}' value. Delete it and relaunch the app.", key), ex);
+                    throw new ApplicationException( $"Cannot decrypt App.config's '{key}' value. Delete it and relaunch the app.", ex);
                 }
             }
 
@@ -75,7 +74,7 @@ namespace JiraTogglSync.CommandLine
         {
             byte[] encryptedData = ProtectedData.Protect(
                 Encoding.ASCII.GetBytes(input),
-                entropy,
+                Entropy,
                 DataProtectionScope.CurrentUser);
 
             return Convert.ToBase64String(encryptedData);
@@ -85,7 +84,7 @@ namespace JiraTogglSync.CommandLine
         {
             byte[] decryptedData = ProtectedData.Unprotect(
                 Convert.FromBase64String(encryptedData),
-                entropy,
+                Entropy,
                 DataProtectionScope.CurrentUser);
 
             return Encoding.ASCII.GetString(decryptedData);

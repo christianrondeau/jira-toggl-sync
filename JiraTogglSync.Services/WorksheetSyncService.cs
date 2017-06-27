@@ -32,7 +32,8 @@ namespace JiraTogglSync.Services
 
 				var validEntries = sourceEntries.Where(entry => entry.IssueKey != null);
 
-				var issues = _target.LoadIssues(validEntries.Select(entry => entry.IssueKey).Distinct()).ToList();
+				var issueKeys = validEntries.Select(entry => entry.IssueKey).Distinct();
+				var issues = _target.LoadIssues(issueKeys).ToList();
 
 				foreach (var issue in issues)
 				{
@@ -43,7 +44,7 @@ namespace JiraTogglSync.Services
 			}
 			catch (JiraClientException ex)
 			{
-				throw new Exception(string.Format("{0}\n{1}", ex.Message, ex.ErrorResponse));
+				throw new Exception($"{ex.Message}\n{ex.ErrorResponse}");
 			}
 		}
 

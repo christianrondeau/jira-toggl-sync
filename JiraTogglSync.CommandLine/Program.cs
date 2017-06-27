@@ -5,33 +5,47 @@ using System.Collections.Generic;
 
 namespace JiraTogglSync.CommandLine
 {
-	class Program
+	public class Program
 	{
-		static void Main(string[] args)
+		private const string DefaultDescriptionTemplate = "{{toggl:id}}: {{toggl:description}}";
+
+		public static void Main(string[] args)
 		{
-		    var purge = false; //for now purge is not supported
-            var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
-			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig("jira-decription-template", 
-                                                                                        () => AskFor("JIRA Description template (leave blank to use Default)"), 
-                                                                                        defaultValue: "{{toggl:id}}\r\n{{toggl:description}}",
-                                                                                        isValueValid: v =>
-                                                                                        {
-                                                                                            if (!purge || v.Contains("{{toggl:id}}"))
-                                                                                                return true;
+			var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
+			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig(
+				"jira-decription-template",
+				() => AskFor($"JIRA Description template (default: '{DefaultDescriptionTemplate}')"),
+				DefaultDescriptionTemplate,
+				v =>
+				{
+					if (v.Contains("{{toggl:id}}"))
+						return true;
 
-                                                                                            Console.WriteLine("Error: When purge is enabled template must contain placeholder for toggl time entry id: {{toggl:id}}");
-                                                                                            return false;
-                                                                                        });
+					Console.Error.WriteLine("Error: Template must contain placeholder for toggl time entry id: {{toggl:id}}");
+					return false;
+				});
 
-            var toggl = new TogglRepository(togglApiKey, jiraWorkItemDescriptionTemplate);
+			var toggl = new TogglRepository(togglApiKey, jiraWorkItemDescriptionTemplate);
 			Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
 
-			var jiraInstance = ConfigurationHelper.GetValueFromConfig("jira-instance", () => AskFor("JIRA Instance"));
+			var jiraInstance = ConfigurationHelper.GetValueFromConfig(
+				"jira-instance",
+				() => AskFor("JIRA Instance"),
+				null,
+				value =>
+				{
+					Uri url;
+					if (Uri.TryCreate(value, UriKind.Absolute, out url))
+						return true;
+
+					Console.Error.WriteLine("Error: The JIRA instance must be a valid HTTP address (e.g. https://(yourcompany).atlassian.net)");
+					return false;
+				});
+
 			var jiraUsername = ConfigurationHelper.GetValueFromConfig("jira-username", () => AskFor("JIRA Username"));
 			var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
 			var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
-			var jiraWorklogStrategy = ConfigurationHelper.GetValueFromConfig("jira-worklogStrategy", () => AskFor("JIRA Worklog strategy (AutoAdjustRemainingEstimate, RetainRemainingEstimate (default))"));
-			var jira = new JiraRestService(jiraInstance, jiraUsername, jiraPassword, jiraWorklogStrategy);
+			var jira = new JiraRestService(jiraInstance, jiraUsername, jiraPassword);
 			Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
 
 			var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
@@ -47,7 +61,7 @@ namespace JiraTogglSync.CommandLine
 			{
 				var issueTitle = issue.ToString();
 				Console.WriteLine(issueTitle);
-				Console.WriteLine(new String('=', issueTitle.Length));
+				Console.WriteLine(new string('=', issueTitle.Length));
 
 				foreach (var entry in issue.WorkLog.Where(entry => entry.RoundedDuration.Ticks > 0))
 				{
@@ -62,10 +76,11 @@ namespace JiraTogglSync.CommandLine
 
 				Console.WriteLine();
 			}
-			if(!entriesToSync.Any()) return;
-			
+			if (!entriesToSync.Any()) return;
+
 			Console.WriteLine();
 			Console.Write("Send to Jira? (y/n)");
+
 			if (Console.ReadKey(true).KeyChar == 'y')
 			{
 				foreach (var entry in entriesToSync)

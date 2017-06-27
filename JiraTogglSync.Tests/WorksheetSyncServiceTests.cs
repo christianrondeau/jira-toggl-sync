@@ -4,7 +4,6 @@ using System.Linq;
 using JiraTogglSync.Services;
 using NSubstitute;
 using NUnit.Framework;
-using Ploeh.SemanticComparison;
 
 namespace JiraTogglSync.Tests
 {
