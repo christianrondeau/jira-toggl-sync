@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Toggl;
+using Toggl.Interfaces;
 using Toggl.QueryObjects;
 using Toggl.Services;
 
@@ -11,30 +12,30 @@ namespace JiraTogglSync.Services
 {
 	public class TogglRepository : IExternalWorksheetRepository
     {
-        private readonly string _apiKey;
+        private readonly ITimeEntryService _timeEntryService;
+        private readonly IUserService _userService;
         private readonly string _descriptionTemplate;
 
-        public TogglRepository(string apiKey, string descriptionTemplate)
+        public TogglRepository( ITimeEntryService timeEntryService, IUserService userService, string descriptionTemplate)
         {
-            if (apiKey == null) throw new ArgumentNullException("apiKey");
-            if (descriptionTemplate == null) throw new ArgumentNullException("descriptionTemplate");
+            if (timeEntryService == null) throw new ArgumentNullException(nameof(timeEntryService));
+            if (userService == null) throw new ArgumentNullException(nameof(userService));
+            if (descriptionTemplate == null) throw new ArgumentNullException(nameof(descriptionTemplate));
 
-            _apiKey = apiKey;
+            _timeEntryService = timeEntryService;
+            _userService = userService;
             _descriptionTemplate = descriptionTemplate;
         }
 
         public string GetUserInformation()
         {
-            var userService = new UserService(_apiKey);
-            var currentUser = userService.GetCurrent();
+            var currentUser = _userService.GetCurrent();
             return string.Format("{0} ({1})", currentUser.FullName, currentUser.Email);
         }
 
-		public IEnumerable<WorkLogEntry> GetEntries(DateTime startDate, DateTime endDate, IEnumerable<string> jiraProjectKeys)
+		public WorkLogEntry[] GetEntries(DateTime startDate, DateTime endDate, IEnumerable<string> jiraProjectKeys)
 		{
-			var timeEntryService = new TimeEntryService(_apiKey);
-
-			var togglTimeEntries = timeEntryService
+			var togglTimeEntries = _timeEntryService
 				.List(new TimeEntryParams
 					{
 						StartDate = startDate,
@@ -46,7 +47,7 @@ namespace JiraTogglSync.Services
 
             jiraWorkLogEntries = jiraWorkLogEntries.Where(j => j.HasIssueKeyAssigned());
 
-            return jiraWorkLogEntries;
+            return jiraWorkLogEntries.ToArray();
 		}
 
 	    private WorkLogEntry ToWorkLogEntry(TimeEntry togglTimeEntry, string descriptionTemplate, IEnumerable<string> jiraProjectKeys)

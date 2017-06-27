@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace JiraTogglSync.Services
 {
 	public interface IJiraRepository
 	{
-		IEnumerable<Issue> LoadIssues(IEnumerable<string> keys);
-		void AddWorkLog(WorkLogEntry entry);
+        WorkLogEntry[] GetEntries(DateTime startDate, DateTime endDate, IEnumerable<string> jiraProjectKeys);
+        OperationResult AddWorkLog(WorkLogEntry entry);
+	    OperationResult UpdateWorkLog(WorkLogEntry entry);
+	    OperationResult DeleteWorkLog(WorkLogEntry entry);
 	}
 }

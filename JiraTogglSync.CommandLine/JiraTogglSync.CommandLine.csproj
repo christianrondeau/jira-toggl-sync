@@ -37,9 +37,11 @@
     <Reference Include="System.Configuration" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigurationHelper.cs" />
+    <Compile Include="ConsoleHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -51,6 +53,22 @@
       <Project>{331ac73b-91ae-4e76-acc1-3923d0479188}</Project>
       <Name>JiraTogglSync.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Modules\C--Toggl-Api-Client\Toggl\Toggl.csproj">
+      <Project>{AE43A30C-8515-41F2-A018-AA9AE9B80C27}</Project>
+      <Name>Toggl</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

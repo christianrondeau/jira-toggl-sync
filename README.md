@@ -30,7 +30,7 @@ Following placeholders can be used in the template:
 - **{{toggl:taskId}}**
 - **{{toggl:updatedOn}}**
 
-Default placeholder: `{{toggl:id}}\r\n{{toggl:description}}`
+Default placeholder: `{{toggl:id}}: {{toggl:description}}`
 
 Contributors
 ============
