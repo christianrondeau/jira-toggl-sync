@@ -23,7 +23,7 @@ namespace JiraTogglSync.Tests
 				.LoadIssues(Arg.Any<IEnumerable<string>>())
 				.Returns(new[] { new Issue { Key = "KEY-123", Summary = "Create the new gizmo" } });
 
-			var service = new WorksheetSyncService(source, target, new[] { "KEY" });
+			var service = new WorksheetSyncService(source, target);
 			var suggestions = service.GetSuggestions(new DateTime(2010, 01, 01), new DateTime(2010, 01, 14)).ToArray();
 
 			Assert.AreEqual(suggestions.Length, 1);

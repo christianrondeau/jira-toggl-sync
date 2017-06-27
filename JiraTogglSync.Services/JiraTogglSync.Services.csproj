@@ -42,10 +42,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Issue.cs" />
-    <Compile Include="IWorksheetSourceService.cs" />
-    <Compile Include="IWorksheetTargetService.cs" />
+    <Compile Include="IExternalWorksheetRepository.cs" />
+    <Compile Include="IJiraRepository.cs" />
     <Compile Include="JiraRestService..cs" />
-    <Compile Include="TogglService.cs" />
+    <Compile Include="SyncPlan.cs" />
+    <Compile Include="TogglRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkLogEntry.cs" />
     <Compile Include="WorksheetSyncService.cs" />

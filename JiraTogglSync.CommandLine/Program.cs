@@ -23,7 +23,7 @@ namespace JiraTogglSync.CommandLine
                                                                                             return false;
                                                                                         });
 
-            var toggl = new TogglService(togglApiKey, jiraWorkItemDescriptionTemplate);
+            var toggl = new TogglRepository(togglApiKey, jiraWorkItemDescriptionTemplate);
 			Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
 
 			var jiraInstance = ConfigurationHelper.GetValueFromConfig("jira-instance", () => AskFor("JIRA Instance"));
@@ -37,7 +37,7 @@ namespace JiraTogglSync.CommandLine
 			var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
 			var roundingToMinutes = int.Parse(ConfigurationHelper.GetValueFromConfig("roundingToMinutes", () => AskFor("Round duration to X minutes")));
 
-			var sync = new WorksheetSyncService(toggl, jira, jiraKeyPrefixes.Split(','));
+			var sync = new WorksheetSyncService(toggl, jira);
 
 			var suggestions = sync.GetSuggestions(DateTime.Now.Date.AddDays(-syncDays), DateTime.Now.Date.AddDays(1)).ToList();
 			suggestions.ForEach(x => x.WorkLog.ForEach(y => y.Round(roundingToMinutes)));

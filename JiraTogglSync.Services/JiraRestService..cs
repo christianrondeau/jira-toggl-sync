@@ -5,7 +5,7 @@ using TechTalk.JiraRestClient;
 
 namespace JiraTogglSync.Services
 {
-	public class JiraRestService : IWorksheetTargetService
+	public class JiraRestService : IJiraRepository
     {
 		
 		private readonly IJiraClient<IssueFields> _jira;

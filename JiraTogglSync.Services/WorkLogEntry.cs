@@ -21,6 +21,11 @@ namespace JiraTogglSync.Services
 			RoundedDuration = RoundToClosest(Stop - Start, new TimeSpan(0, 0, nbMinutes, 0));
 		}
 
+	    public bool HasIssueKeyAssigned()
+	    {
+	        return string.IsNullOrEmpty(this.IssueKey);
+	    }
+
 		private static TimeSpan RoundToClosest(TimeSpan input, TimeSpan precision)
 		{
 			if (input < TimeSpan.Zero)

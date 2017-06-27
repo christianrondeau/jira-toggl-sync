@@ -8,29 +8,27 @@ namespace JiraTogglSync.Services
 {
 	public class WorksheetSyncService
 	{
-		private readonly IList<Regex> _regexes;
-		private readonly IWorksheetSourceService _source;
-		private readonly IWorksheetTargetService _target;
+		private readonly IExternalWorksheetRepository _source;
+		private readonly IJiraRepository _target;
 
-		public WorksheetSyncService(IWorksheetSourceService source, IWorksheetTargetService target, IEnumerable<string> prefixes)
+		public WorksheetSyncService(IExternalWorksheetRepository source, IJiraRepository target)
 		{
 			_source = source;
 			_target = target;
 
-			_regexes = prefixes.Select(prefix => new Regex(prefix + @"-\d+")).ToList();
 		}
 
 		public IEnumerable<Issue> GetSuggestions(DateTime fromDate, DateTime toDate)
 		{
 			try
 			{
-				var sourceEntries = _source.GetEntries(fromDate, toDate).ToList();
+                //TODO call properly
+                var sourceEntries = _source.GetEntries(fromDate, toDate, null).ToList();
 
-				foreach (var entry in sourceEntries)
-				{
-					entry.IssueKey = ExtractJiraIncidentNumber(entry.Description);
-					entry.Description = RemoveIncidentNumber(entry.Description, entry.IssueKey);
-				}
+//				foreach (var entry in sourceEntries)
+//				{
+//					entry.IssueKey = ExtractJiraIncidentNumber(entry.Description);
+//				}
 
 				var validEntries = sourceEntries.Where(entry => entry.IssueKey != null);
 
@@ -49,19 +47,13 @@ namespace JiraTogglSync.Services
 			}
 		}
 
-		private static string RemoveIncidentNumber(string description, string issueKey)
-		{
-			return new Regex("^" + issueKey + @"[\s:]+").Replace(description, "");
-		}
+	    public SyncPlan GetSyncPlan(DateTime fromDate, DateTime toDate, IEnumerable<string> jiraProjectKeys)
+	    {
+	        var _sourceEntries = _source.GetEntries(fromDate, toDate, jiraProjectKeys);
+	        //var _targetEntries = _target.LoadIssues();
 
-		private string ExtractJiraIncidentNumber(string description)
-		{
-			return _regexes
-				.Select(regex => regex.Match(description))
-				.Where(x => x.Success)
-				.Select(x => x.Value)
-				.FirstOrDefault();
-		}
+            throw new NotImplementedException();
+	    }
 
 		public void AddWorkLog(WorkLogEntry entry)
 		{
