@@ -13,100 +13,98 @@ namespace JiraTogglSync.Tests
 {
 	public class WorksheetSyncServiceTests
 	{
-
-
-
 		public static IEnumerable CreateSyncPlanTestCases()
 		{
 			yield return new SyncPlanScenario("Purge OFF: If no Toggl entries - make no changes",
-					sourceEntries: Enumerable.Empty<WorkLogEntry>(),
-					targetEntries: Enumerable.Empty<WorkLogEntry>(),
-					doPurge: false,
-					expectedResult: new SyncPlan());
+				sourceEntries: Enumerable.Empty<WorkLogEntry>(),
+				targetEntries: Enumerable.Empty<WorkLogEntry>(),
+				doPurge: false,
+				expectedResult: new SyncPlan());
 
 			yield return new SyncPlanScenario("Purge OFF: If there are Toggl entries - add them to JIRA",
-					sourceEntries: new[] { new WorkLogEntry() { Description = "New Toggl entry" } },
-					targetEntries: Enumerable.Empty<WorkLogEntry>(),
-					doPurge: false,
-					expectedResult: new SyncPlan() { ToAdd = new[] { new WorkLogEntry() { Description = "New Toggl entry" } }.ToList() });
+				sourceEntries: new[] {new WorkLogEntry() {Description = "New Toggl entry"}},
+				targetEntries: Enumerable.Empty<WorkLogEntry>(),
+				doPurge: false,
+				expectedResult: new SyncPlan() {ToAdd = new[] {new WorkLogEntry() {Description = "New Toggl entry"}}.ToList()});
 
-			yield return new SyncPlanScenario(" Purge ON: If there are entries in JIRA, but no Toggl entries - remove JIRA entries",
-					sourceEntries: Enumerable.Empty<WorkLogEntry>(),
-					targetEntries: new[] { new WorkLogEntry() { Description = "Existing JIRA entry" } },
-					doPurge: true,
-					expectedResult: new SyncPlan() { ToDeleteOrphaned = new[] { new WorkLogEntry() { Description = "Existing JIRA entry" } }.ToList() });
+			yield return new SyncPlanScenario("Purge ON: If there are entries in JIRA, but no Toggl entries - remove JIRA entries",
+				sourceEntries: Enumerable.Empty<WorkLogEntry>(),
+				targetEntries: new[] {new WorkLogEntry() {Description = "Existing JIRA entry"}},
+				doPurge: true,
+				expectedResult:
+					new SyncPlan() {ToDeleteOrphaned = new[] {new WorkLogEntry() {Description = "Existing JIRA entry"}}.ToList()});
 
-			yield return new SyncPlanScenario(" Purge ON: If there are no JIRA nor Toggl entries - make no changes",
-					sourceEntries: Enumerable.Empty<WorkLogEntry>(),
-					targetEntries: Enumerable.Empty<WorkLogEntry>(),
-					doPurge: true,
-					expectedResult: new SyncPlan());
+			yield return new SyncPlanScenario("Purge ON: If there are no JIRA nor Toggl entries - make no changes",
+				sourceEntries: Enumerable.Empty<WorkLogEntry>(),
+				targetEntries: Enumerable.Empty<WorkLogEntry>(),
+				doPurge: true,
+				expectedResult: new SyncPlan());
 
-			yield return new SyncPlanScenario(" Purge ON: If there are duplicate entries in JIRA (based on toggl ID) - remove duplicates JIRA entries and add new Toggl entry",
-					sourceEntries: new[] { new WorkLogEntry() { Description = "Toggl Entry" }.SetSourceId(123) },
-					targetEntries: new[]
+			yield return new SyncPlanScenario("Purge ON: If there are duplicate entries in JIRA (based on toggl ID) - remove duplicates JIRA entries and add new Toggl entry",
+				sourceEntries: new[] {new WorkLogEntry() {Description = "Toggl Entry"}.SetSourceId(123)},
+				targetEntries: new[]
+				{
+					new WorkLogEntry() {Description = "JIRA Dup 1"}.SetSourceId(123),
+					new WorkLogEntry() {Description = "JIRA Dup 2"}.SetSourceId(123)
+				},
+				doPurge: true,
+				expectedResult: new SyncPlan()
+				{
+					ToDeleteDuplicates = new[]
 					{
-										new WorkLogEntry() {Description = "JIRA Dup 1"}.SetSourceId(123),
-										new WorkLogEntry() {Description = "JIRA Dup 2"}.SetSourceId(123)
-					},
-					doPurge: true,
-					expectedResult: new SyncPlan()
-					{
-						ToDeleteDuplicates = new[]
-							{
-												new WorkLogEntry() {Description = "JIRA Dup 1"}.SetSourceId(123),
-												new WorkLogEntry() {Description = "JIRA Dup 2"}.SetSourceId(123)
-							}.ToList(),
-						ToAdd = new[] { new WorkLogEntry() { Description = "Toggl Entry" }.SetSourceId(123) }.ToList()
-					});
+						new WorkLogEntry() {Description = "JIRA Dup 1"}.SetSourceId(123),
+						new WorkLogEntry() {Description = "JIRA Dup 2"}.SetSourceId(123)
+					}.ToList(),
+					ToAdd = new[] {new WorkLogEntry() {Description = "Toggl Entry"}.SetSourceId(123)}.ToList()
+				});
 
-			yield return new SyncPlanScenario(" Purge ON: If there are new Toggl entries - add them to JIRA",
-					sourceEntries: new[] { new WorkLogEntry() { Description = "New Toggl Entry" } },
-					targetEntries: Enumerable.Empty<WorkLogEntry>(),
-					doPurge: true,
-					expectedResult: new SyncPlan() { ToAdd = new[] { new WorkLogEntry() { Description = "New Toggl Entry" } }.ToList() });
+			yield return new SyncPlanScenario("Purge ON: If there are new Toggl entries - add them to JIRA",
+				sourceEntries: new[] {new WorkLogEntry() {Description = "New Toggl Entry"}},
+				targetEntries: Enumerable.Empty<WorkLogEntry>(),
+				doPurge: true,
+				expectedResult: new SyncPlan() {ToAdd = new[] {new WorkLogEntry() {Description = "New Toggl Entry"}}.ToList()});
 
-			yield return new SyncPlanScenario(" Purge ON: If Toggl entries are already in JIRA and have no differences - make no changes",
-					sourceEntries: new[]
+			yield return new SyncPlanScenario("Purge ON: If Toggl entries are already in JIRA and have no differences - make no changes",
+				sourceEntries: new[]
+				{
+					new WorkLogEntry() {Description = "Time Entry 1"}.SetSourceId(123),
+					new WorkLogEntry() {Description = "Time Entry 2"}.SetSourceId(456)
+				},
+				targetEntries: new[]
+				{
+					new WorkLogEntry() {Description = "Time Entry 1"}.SetSourceId(123),
+					new WorkLogEntry() {Description = "Time Entry 2"}.SetSourceId(456)
+				},
+				doPurge: true,
+				expectedResult: new SyncPlan()
+				{
+					NoChanges = new[]
 					{
-										new WorkLogEntry() { Description = "Time Entry 1" }.SetSourceId(123),
-										new WorkLogEntry() { Description = "Time Entry 2" }.SetSourceId(456)
-					},
-					targetEntries: new[]
-					{
-										new WorkLogEntry() { Description = "Time Entry 1" }.SetSourceId(123),
-										new WorkLogEntry() { Description = "Time Entry 2" }.SetSourceId(456)
-					},
-					doPurge: true,
-					expectedResult: new SyncPlan()
-					{
-						NoChanges = new[]
-							{
-												new WorkLogEntry() { Description = "Time Entry 1" }.SetSourceId(123),
-												new WorkLogEntry() { Description = "Time Entry 2" }.SetSourceId(456)
-							}.ToList()
-					});
+						new WorkLogEntry() {Description = "Time Entry 1"}.SetSourceId(123),
+						new WorkLogEntry() {Description = "Time Entry 2"}.SetSourceId(456)
+					}.ToList()
+				});
 
-			yield return new SyncPlanScenario(" Purge ON: If Toggl entries are already in JIRA but have differences - update JIRA entries based on Toggl entries",
-					sourceEntries: new[]
+			yield return new SyncPlanScenario("Purge ON: If Toggl entries are already in JIRA but have differences - update JIRA entries based on Toggl entries",
+				sourceEntries: new[]
+				{
+					new WorkLogEntry() {Description = "Toggl Description 1"}.SetSourceId(123),
+					new WorkLogEntry() {Description = "Toggl Description 2"}.SetSourceId(456)
+				},
+				targetEntries: new[]
+				{
+					new WorkLogEntry() {Description = "JIRA Descr 1"}.SetSourceId(123),
+					new WorkLogEntry() {Description = "JIRA Descr 2"}.SetSourceId(456)
+				},
+				doPurge: true,
+				expectedResult: new SyncPlan()
+				{
+					ToUpdate = new[]
 					{
-										new WorkLogEntry() { Description = "Toggl Description 1" }.SetSourceId(123),
-										new WorkLogEntry() { Description = "Toggl Description 2" }.SetSourceId(456)
-					},
-					targetEntries: new[]
-					{
-										new WorkLogEntry() { Description = "JIRA Descr 1" }.SetSourceId(123),
-										new WorkLogEntry() { Description = "JIRA Descr 2" }.SetSourceId(456)
-					},
-					doPurge: true,
-					expectedResult: new SyncPlan()
-					{
-						ToUpdate = new[]
-							{
-												new WorkLogEntry() { Description = "Toggl Description 1" }.SetSourceId(123),
-												new WorkLogEntry() { Description = "Toggl Description 2" }.SetSourceId(456)
-							}.ToList()
-					});
+						new WorkLogEntry() {Description = "Toggl Description 1"}.SetSourceId(123),
+						new WorkLogEntry() {Description = "Toggl Description 2"}.SetSourceId(456)
+					}.ToList()
+				});
 		}
 
 		[TestCaseSource(nameof(CreateSyncPlanTestCases))]
@@ -194,6 +192,7 @@ namespace JiraTogglSync.Tests
 			return workLogEntry;
 		}
 	}
+
 	public class SyncPlanScenario : TestCaseData
 	{
 		public string MyProperty { get; set; }

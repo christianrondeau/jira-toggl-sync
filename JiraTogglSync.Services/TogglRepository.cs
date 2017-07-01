@@ -74,13 +74,13 @@ namespace JiraTogglSync.Services
 		public static string CreateDescription(TimeEntry timeEntry, string descriptionTemplate)
 		{
 			var result = descriptionTemplate.Replace("{{toggl:id}}", string.Format("[toggl-id:{0}]", timeEntry.Id))
-																			.Replace("{{toggl:description}}", timeEntry.Description)
-																			.Replace("{{toggl:createdWith}}", timeEntry.CreatedWith)
-																			.Replace("{{toggl:isBillable}}", timeEntry.IsBillable == null ? "" : timeEntry.IsBillable.ToString())
-																			.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
-																			.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.TagNames ?? Enumerable.Empty<string>()))
-																			.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString())
-																			.Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn == null ? "" : timeEntry.UpdatedOn.ToString());
+											.Replace("{{toggl:description}}", timeEntry.Description)
+											.Replace("{{toggl:createdWith}}", timeEntry.CreatedWith)
+											.Replace("{{toggl:isBillable}}", timeEntry.IsBillable == null ? "" : timeEntry.IsBillable.ToString())
+											.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
+											.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.TagNames ?? Enumerable.Empty<string>()))
+											.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString())
+											.Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn == null ? "" : timeEntry.UpdatedOn.ToString());
 
 			return result;
 
