@@ -7,11 +7,13 @@ namespace JiraTogglSync.Services
 {
 	public class JiraRestService : IJiraRepository
 	{
+		private readonly string _username;
 
 		private readonly IJiraClient<IssueFields> _jira;
 
 		public JiraRestService(string instance, string username, string password)
 		{
+			_username = username;
 			_jira = new JiraClient<IssueFields>(instance, username, password);
 		}
 
@@ -46,7 +48,9 @@ namespace JiraTogglSync.Services
 			foreach (var issue in recentlyUpdatedIssues)
 			{
 				var workLogs = _jira.GetWorklogs(new IssueRef() { id = issue.id })
-					.Where(workLog => workLog.updated >= startDate && workLog.updated <= endDate);
+					.Where(workLog => workLog.updated >= startDate 
+									&& workLog.updated <= endDate 
+									&& workLog?.author?.name == _username);
 
 				result.AddRange(workLogs.Select(wl => new WorkLogEntry(wl, issue.key)));
 			}
