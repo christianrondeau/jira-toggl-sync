@@ -5,8 +5,8 @@ namespace JiraTogglSync.Tests
 {
 	public class IssueTests
 	{
-        [Test]
-        public void CanDisplayNicelyAsString()
+		[Test]
+		public void CanDisplayNicelyAsString()
 		{
 			Assert.AreEqual(
 				new Issue { Key = "KEY-123", Summary = "My Issue Summary" }.ToString(),
