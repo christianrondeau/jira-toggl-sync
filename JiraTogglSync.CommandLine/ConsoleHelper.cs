@@ -15,11 +15,16 @@ namespace JiraTogglSync.CommandLine
 
 			Console.WriteLine();
 			Console.Write(message);
-			if (Console.ReadKey().KeyChar == 'y')
-			{
+			var input = Console.ReadLine();
+
+			if (input == "y")
 				return true;
-			}
-			return false;
+
+			if (input == "n")
+				return false;
+
+			Console.Error.WriteLine("Wrong value was provided.");
+			return Confirm(message);
 		}
 	}
 }
