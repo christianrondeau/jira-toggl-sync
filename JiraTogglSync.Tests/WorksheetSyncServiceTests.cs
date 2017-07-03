@@ -105,6 +105,22 @@ namespace JiraTogglSync.Tests
 						new WorkLogEntry() {Description = "Toggl Description 2"}.SetSourceId(456)
 					}.ToList()
 				});
+
+			yield return new SyncPlanScenario("Purge ON: If Toggl entry is already in JIRA but since then issue key was modified in toggl - remove old workLog, and add new one",
+				sourceEntries: new[]
+				{
+					new WorkLogEntry() {Description = "", IssueKey = "ABC-456"}.SetSourceId(123),
+				},
+				targetEntries: new[]
+				{
+					new WorkLogEntry() {Description = "", IssueKey = "ABC-123"}.SetSourceId(123),
+				},
+				doPurge: true,
+				expectedResult: new SyncPlan()
+				{
+					ToDeleteOrphaned = new[] { new WorkLogEntry() {Description = "", IssueKey = "ABC-123"}.SetSourceId(123) }.ToList(),
+					ToAdd = new[] { new WorkLogEntry() {Description = "", IssueKey = "ABC-456"}.SetSourceId(123) }.ToList()
+				});
 		}
 
 		[TestCaseSource(nameof(CreateSyncPlanTestCases))]

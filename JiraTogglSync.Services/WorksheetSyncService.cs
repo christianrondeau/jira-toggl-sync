@@ -73,7 +73,7 @@ namespace JiraTogglSync.Services
 			targetEntries = targetEntries.Except(duplicates).ToArray();
 
 			var orphaned =
-					targetEntries.Where(target => sourceEntries.All(source => source.SourceId != target.SourceId)).ToArray();
+					targetEntries.Where(target => !sourceEntries.Any(source => source.SourceId == target.SourceId && source.IssueKey == target.IssueKey)).ToArray();
 			syncPlan.ToDeleteOrphaned.AddRange(orphaned);
 			targetEntries = targetEntries.Except(orphaned).ToArray();
 
