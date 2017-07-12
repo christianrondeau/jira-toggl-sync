@@ -48,8 +48,8 @@ namespace JiraTogglSync.Services
 			foreach (var issue in recentlyUpdatedIssues)
 			{
 				var workLogs = _jira.GetWorklogs(new IssueRef() { id = issue.id })
-					.Where(workLog => workLog.updated >= startDate 
-									&& workLog.updated <= endDate 
+					.Where(workLog => workLog.started >= startDate 
+									&& workLog.started.AddSeconds(workLog.timeSpentSeconds) <= endDate 
 									&& workLog?.author?.name == _username);
 
 				result.AddRange(workLogs.Select(wl => new WorkLogEntry(wl, issue.key)));
