@@ -26,7 +26,7 @@ namespace JiraTogglSync.Services
 		public SyncReport Syncronize(DateTime fromDate, DateTime toDate, IEnumerable<string> jiraProjectKeys, bool doPurge, int roundMinutes)
 		{
 			var sourceEntries = _source.GetEntries(fromDate, toDate, jiraProjectKeys);
-			var targetEntries = _target.GetEntries(fromDate, toDate, jiraProjectKeys);
+			var targetEntries = doPurge ? _target.GetEntries(fromDate, toDate, jiraProjectKeys) : new WorkLogEntry[0];
 
 			RoundMinutes(sourceEntries, roundMinutes);
 			RoundMinutes(targetEntries, roundMinutes);
