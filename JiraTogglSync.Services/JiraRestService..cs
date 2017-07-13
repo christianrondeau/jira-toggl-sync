@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TechTalk.JiraRestClient;
 
 namespace JiraTogglSync.Services
@@ -43,21 +44,30 @@ namespace JiraTogglSync.Services
 
 			var recentlyUpdatedIssues = _jira.GetIssuesByQuery(jqlQuery);
 
-			var result = new List<WorkLogEntry>();
+			var tasks = new List<Task<List<WorkLogEntry>>>();
 
 			foreach (var issue in recentlyUpdatedIssues)
 			{
-				var workLogs = _jira.GetWorklogs(new IssueRef() { id = issue.id })
-					.Where(workLog => workLog.started >= startDate 
-									&& workLog.started.AddSeconds(workLog.timeSpentSeconds) <= endDate 
-									&& workLog?.author?.name == _username);
-
-				result.AddRange(workLogs.Select(wl => new WorkLogEntry(wl, issue.key)));
+				tasks.Add(GetWorkLogEntriesAsync(startDate, endDate, issue));
 			}
 
-			return result.ToArray();
+			Task.WaitAll(tasks.ToArray());
+
+			return tasks.SelectMany(t => t.Result).ToArray();
 		}
 
+		private Task<List<WorkLogEntry>> GetWorkLogEntriesAsync(DateTime startDate, DateTime endDate, Issue<IssueFields> issue)
+		{
+			return Task.Run(() =>
+			   _jira.GetWorklogs(new IssueRef() { id = issue.id })
+								   .Where(workLog => workLog.started >= startDate
+												   && workLog.started.AddSeconds(workLog.timeSpentSeconds) <= endDate
+												   && workLog?.author?.name == _username)
+								   .Select(wl => new WorkLogEntry(wl, issue.key))
+								   .ToList()
+
+			);
+		}
 
 		public OperationResult UpdateWorkLog(WorkLogEntry entry)
 		{
