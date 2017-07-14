@@ -1,12 +1,11 @@
 ﻿using JiraTogglSync.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace JiraTogglSync.Tests
 {
-	[TestClass]
 	public class IssueTests
 	{
-		[TestMethod]
+		[Test]
 		public void CanDisplayNicelyAsString()
 		{
 			Assert.AreEqual(

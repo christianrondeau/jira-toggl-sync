@@ -2,6 +2,7 @@
 using System.Linq;
 using JiraTogglSync.Services;
 using System.Collections.Generic;
+using Toggl.Services;
 
 namespace JiraTogglSync.CommandLine
 {
@@ -25,7 +26,12 @@ namespace JiraTogglSync.CommandLine
 					return false;
 				});
 
-			var toggl = new TogglService(togglApiKey, jiraWorkItemDescriptionTemplate);
+			//if number of dependencies grows, we will need to use a container
+			var toggl = new TogglRepository(
+								new TimeEntryService(togglApiKey),
+								new UserService(togglApiKey),
+								jiraWorkItemDescriptionTemplate);
+
 			Console.WriteLine("Toggl: Connected as {0}", toggl.GetUserInformation());
 
 			var jiraInstance = ConfigurationHelper.GetValueFromConfig(
@@ -45,47 +51,38 @@ namespace JiraTogglSync.CommandLine
 			var jiraUsername = ConfigurationHelper.GetValueFromConfig("jira-username", () => AskFor("JIRA Username"));
 			var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
 			var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
+			var doPurge = ConfigurationHelper.GetValueFromConfig(
+					"jira-purge",
+					() => AskFor("Purge JIRA from orphaned and out-of-sync work log items? (y/n)"),
+					"n",
+					value => value == "y" || value == "n"
+					);
 			var jira = new JiraRestService(jiraInstance, jiraUsername, jiraPassword);
 			Console.WriteLine("JIRA: Connected as {0}", jira.GetUserInformation());
 
 			var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
 			var roundingToMinutes = int.Parse(ConfigurationHelper.GetValueFromConfig("roundingToMinutes", () => AskFor("Round duration to X minutes")));
 
-			var sync = new WorksheetSyncService(toggl, jira, jiraKeyPrefixes.Split(','));
+			var sync = new WorksheetSyncService(toggl, jira);
+			sync.AgreeToAdd = workLogEntries => ConsoleHelper.Confirm($"***NEW work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nADD {workLogEntries.Count()} NEW work log entries?");
+			sync.AgreeToDeleteDuplicates = workLogEntries => ConsoleHelper.Confirm($"***DUPLICATE work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nDELETE {workLogEntries.Count()} DUPLICATE work log entries?");
+			sync.AgreeToDeleteOrphaned = workLogEntries => ConsoleHelper.Confirm($"***ORPHANED work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nDELETE {workLogEntries.Count()} ORPHANED work log entries?");
+			sync.AgreeToUpdate = workLogEntries => ConsoleHelper.Confirm($"***CHANGED work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nUPDATE {workLogEntries.Count()} CHANGED work log entries?");
 
-			var suggestions = sync.GetSuggestions(DateTime.Now.Date.AddDays(-syncDays), DateTime.Now.Date.AddDays(1)).ToList();
-			suggestions.ForEach(x => x.WorkLog.ForEach(y => y.Round(roundingToMinutes)));
-
-			var entriesToSync = new List<WorkLogEntry>();
-			foreach (var issue in suggestions)
-			{
-				var issueTitle = issue.ToString();
-				Console.WriteLine(issueTitle);
-				Console.WriteLine(new string('=', issueTitle.Length));
-
-				foreach (var entry in issue.WorkLog.Where(entry => entry.RoundedDuration.Ticks > 0))
-				{
-					Console.Write(entry + " (y/n)");
-					if (Console.ReadKey(true).KeyChar == 'y')
-					{
-						entriesToSync.Add(entry);
-						Console.Write(" Done");
-					}
-					Console.WriteLine();
-				}
-
-				Console.WriteLine();
-			}
-			if (!entriesToSync.Any()) return;
+			var syncReport = sync.Syncronize(
+					DateTime.Now.Date.AddDays(-syncDays),
+					DateTime.Now.Date.AddDays(1),
+					jiraKeyPrefixes.Split(','),
+					doPurge == "y",
+					roundingToMinutes
+					);
 
 			Console.WriteLine();
-			Console.Write("Send to Jira? (y/n)");
+			Console.WriteLine();
+			Console.WriteLine(syncReport.ToString());
 
-			if (Console.ReadKey(true).KeyChar == 'y')
-			{
-				foreach (var entry in entriesToSync)
-					sync.AddWorkLog(entry);
-			}
+			Console.WriteLine("Press any key to exit.");
+			Console.ReadKey();
 		}
 
 		private static string AskFor(string what)
