@@ -62,7 +62,7 @@ namespace JiraTogglSync.Services
 			   _jira.GetWorklogs(new IssueRef() { id = issue.id })
 								   .Where(workLog => workLog.started >= startDate
 												   && workLog.started.AddSeconds(workLog.timeSpentSeconds) <= endDate
-												   && workLog?.author?.name == _username)
+												   && (_username.Contains('@') ? workLog?.author?.emailAddress : workLog?.author?.name) == _username)
 								   .Select(wl => new WorkLogEntry(wl, issue.key))
 								   .ToList()
 
