@@ -2,6 +2,7 @@
 using System.Linq;
 using JiraTogglSync.Services;
 using System.Collections.Generic;
+using System.Net;
 using Toggl.Services;
 
 namespace JiraTogglSync.CommandLine
@@ -12,6 +13,7 @@ namespace JiraTogglSync.CommandLine
 
 		public static void Main(string[] args)
 		{
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 			var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
 			var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig(
 				"jira-decription-template",
