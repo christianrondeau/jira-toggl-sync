@@ -128,7 +128,7 @@ namespace JiraTogglSync.Tests
 		{
 			var result = WorksheetSyncService.CreateSyncPlan(sourceEntries, targetEntries, doPurge);
 
-			result.ShouldBeEquivalentTo(expectedResult);
+			result.Should().BeEquivalentTo(expectedResult);
 		}
 
 		public static IEnumerable ApplyTestCases()

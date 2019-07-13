@@ -74,7 +74,7 @@ namespace JiraTogglSync.Tests
 
 			var result = sut.GetEntries(startDate, endDate, jiraProjectKeys);
 
-			result.ShouldBeEquivalentTo(expectedResult);
+			result.Should().BeEquivalentTo(expectedResult);
 		}
 
 		public class GetEntriesScenario : TestCaseData

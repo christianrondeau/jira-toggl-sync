@@ -11,6 +11,8 @@ Open a command line in the tool directory and type:
 
 The tool will prompt for a Toggl API key (which can be found in your profile page at the bottom), and for a JIRA instance URL, username, password and the JIRA project keys you want.
 
+You should give an API token instead of your password when prompted for your password, since the password authentication method is deprecated and may not works. You can generate an Api token on [this page](https://id.atlassian.com/manage/api-tokens) [More info here](https://confluence.atlassian.com/cloud/api-tokens-938839638.html)
+
 A list of issues will then be shown. You can accept to enter a worklog for it by pressing "y".
 
 Only issues from the last 14 days with a matching JIRA key will be selected.
