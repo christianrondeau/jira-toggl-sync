@@ -1,89 +1,134 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Toggl;
-using Toggl.Interfaces;
-using Toggl.QueryObjects;
-using Toggl.Services;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Toggl.Api.DataObjects;
+using Toggl.Api.Interfaces;
+using Toggl.Api.QueryObjects;
 
-namespace JiraTogglSync.Services
+namespace JiraTogglSync.Services;
+
+public interface IExternalWorksheetRepository
 {
-	public class TogglRepository : IExternalWorksheetRepository
+	Task<WorkLogEntry[]> GetEntriesAsync(DateTime startDate, DateTime endDate, ICollection<string> jiraProjectKeys, int roundMinutes);
+	Task<string> GetUserInformationAsync();
+}
+
+public class TogglRepository : IExternalWorksheetRepository
+{
+	public class Options
 	{
-		private readonly ITimeEntryService _timeEntryService;
-		private readonly IUserService _userService;
-		private readonly string _descriptionTemplate;
+		[Required]
+		public string DescriptionTemplate { get; set; } = null!;
+	}
 
-		public TogglRepository(ITimeEntryService timeEntryService, IUserService userService, string descriptionTemplate)
+	private readonly ITimeEntryServiceAsync _timeEntryService;
+	private readonly IUserServiceAsync _userService;
+	private readonly IOptions<Options> _options;
+	private readonly ITimeUtil _timeUtil;
+
+	public TogglRepository(
+		ITimeEntryServiceAsync timeEntryService,
+		IUserServiceAsync userService,
+		IOptions<Options> options,
+		ITimeUtil timeUtil
+	)
+	{
+		_timeEntryService = timeEntryService;
+		_userService = userService;
+		_options = options;
+		_timeUtil = timeUtil;
+	}
+
+	public async Task<string> GetUserInformationAsync()
+	{
+		var currentUser = await _userService.GetCurrentAsync();
+		return $"{currentUser.FullName} ({currentUser.Email})";
+	}
+
+	public async Task<WorkLogEntry[]> GetEntriesAsync(
+		DateTime startDate,
+		DateTime endDate,
+		ICollection<string> jiraProjectKeys,
+		int roundMinutes
+	)
+	{
+		var timeEntryParams = new TimeEntryParams
 		{
-			if (timeEntryService == null) throw new ArgumentNullException(nameof(timeEntryService));
-			if (userService == null) throw new ArgumentNullException(nameof(userService));
-			if (descriptionTemplate == null) throw new ArgumentNullException(nameof(descriptionTemplate));
+			StartDate = startDate,
+			EndDate = endDate
+		};
 
-			_timeEntryService = timeEntryService;
-			_userService = userService;
-			_descriptionTemplate = descriptionTemplate;
-		}
+		var togglTimeEntries = (await _timeEntryService.GetAllAsync(timeEntryParams))
+			.Where(w => !string.IsNullOrEmpty(w.Description) && w.Stop != null);
 
-		public string GetUserInformation()
-		{
-			var currentUser = _userService.GetCurrent();
-			return string.Format("{0} ({1})", currentUser.FullName, currentUser.Email);
-		}
+		return togglTimeEntries
+			.Select(t => ToWorkLogEntry(t, _options.Value.DescriptionTemplate, jiraProjectKeys, roundMinutes))
+			.WhereNotNull()
+			.ToArray();
+	}
 
-		public WorkLogEntry[] GetEntries(DateTime startDate, DateTime endDate, IEnumerable<string> jiraProjectKeys)
-		{
-			var togglTimeEntries = _timeEntryService
-				.List(new TimeEntryParams
-				{
-					StartDate = startDate,
-					EndDate = endDate
-				})
-				.Where(w => !string.IsNullOrEmpty(w.Description) && w.Stop != null);
+	private WorkLogEntry? ToWorkLogEntry(
+		TimeEntry togglTimeEntry,
+		string descriptionTemplate,
+		ICollection<string> jiraProjectKeys,
+		int roundMinutes
+	)
+	{
+		if (togglTimeEntry.Start == null)
+			return null;
+		if (togglTimeEntry.Stop == null)
+			return null;
+		if (togglTimeEntry.Id == null)
+			return null;
+		var issueKey = ExtractIssueKey(togglTimeEntry.Description, jiraProjectKeys);
+		if (issueKey == null)
+			return null;
 
-			var jiraWorkLogEntries = togglTimeEntries.Select(t => ToWorkLogEntry(t, _descriptionTemplate, jiraProjectKeys));
+		var startDate = DateTime.Parse(togglTimeEntry.Start);
+		var stopDate = DateTime.Parse(togglTimeEntry.Stop);
+		var duration = stopDate - startDate;
 
-			jiraWorkLogEntries = jiraWorkLogEntries.Where(j => j.HasIssueKeyAssigned());
+		var timeSpentInMinutes = (int) _timeUtil.RoundToClosest(
+			duration,
+			TimeSpan.FromMinutes(roundMinutes)
+		).TotalMinutes;
 
-			return jiraWorkLogEntries.ToArray();
-		}
+		return new WorkLogEntry(
+			issueKey,
+			togglTimeEntry.Id.Value.ToString(),
+			_timeUtil.RoundDateTimeToCloses(startDate, TimeSpan.FromMinutes(roundMinutes)),
+			timeSpentInMinutes,
+			CreateDescription(togglTimeEntry, descriptionTemplate)
+		);
+	}
 
-		private WorkLogEntry ToWorkLogEntry(TimeEntry togglTimeEntry, string descriptionTemplate, IEnumerable<string> jiraProjectKeys)
-		{
-			return new WorkLogEntry
-			{
-				Start = DateTime.Parse(togglTimeEntry.Start),
-				Stop = DateTime.Parse(togglTimeEntry.Stop),
-				Description = CreateDescription(togglTimeEntry, descriptionTemplate),
-				IssueKey = ExtractIssueKey(togglTimeEntry.Description, jiraProjectKeys)
-			};
-		}
+	public static string? ExtractIssueKey(string? description, ICollection<string> jiraProjectKeys)
+	{
+		if (description == null)
+			return null;
+		if (!jiraProjectKeys.Any())
+			return null;
 
-		public static string ExtractIssueKey(string description, IEnumerable<string> jiraProjectKeys)
-		{
-			if (jiraProjectKeys == null || !jiraProjectKeys.Any())
-				return null;
+		var regex = new Regex($@"(?<startAnchor>^| |\[)(?<jiraKey>({string.Join("|", jiraProjectKeys)})-\d+)");
+		var matchResult = regex.Match(description);
+		return matchResult.Success ? matchResult.Groups["jiraKey"].Value : null;
+	}
 
-			var regex = new Regex(string.Format(@"(?<startAnchor>^| |\[)(?<jiraKey>({0})-\d+)", string.Join("|", jiraProjectKeys)));
-			var matchResult = regex.Match(description);
-			return matchResult.Success ? matchResult.Groups["jiraKey"].Value : null;
-		}
+	private static string CreateDescription(TimeEntry timeEntry, string descriptionTemplate)
+	{
+		var result = descriptionTemplate.Replace("{{toggl:id}}", $"[toggl-id:{timeEntry.Id}]")
+			.Replace("{{toggl:description}}", timeEntry.Description)
+			.Replace("{{toggl:createdWith}}", timeEntry.CreatedWith)
+			.Replace("{{toggl:isBillable}}", timeEntry.IsBillable == null ? "" : timeEntry.IsBillable.ToString())
+			.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
+			.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.TagNames ?? Enumerable.Empty<string>()))
+			.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString())
+			.Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn == null ? "" : timeEntry.UpdatedOn);
 
-		public static string CreateDescription(TimeEntry timeEntry, string descriptionTemplate)
-		{
-			var result = descriptionTemplate.Replace("{{toggl:id}}", string.Format("[toggl-id:{0}]", timeEntry.Id))
-											.Replace("{{toggl:description}}", timeEntry.Description)
-											.Replace("{{toggl:createdWith}}", timeEntry.CreatedWith)
-											.Replace("{{toggl:isBillable}}", timeEntry.IsBillable == null ? "" : timeEntry.IsBillable.ToString())
-											.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
-											.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.TagNames ?? Enumerable.Empty<string>()))
-											.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString())
-											.Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn == null ? "" : timeEntry.UpdatedOn.ToString());
-
-			return result;
-
-		}
+		return result;
 	}
 }

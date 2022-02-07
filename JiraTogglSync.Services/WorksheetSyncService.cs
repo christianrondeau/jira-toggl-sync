@@ -1,132 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using TechTalk.JiraRestClient;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
-namespace JiraTogglSync.Services
+namespace JiraTogglSync.Services;
+
+public class WorksheetSyncService
 {
-	public class WorksheetSyncService
+	public class Options
 	{
-		private readonly IExternalWorksheetRepository _source;
-		private readonly IJiraRepository _target;
+		public Func<ICollection<WorkLogEntry>, bool> AgreeToAdd = _ => true;
+		public Func<ICollection<WorkLogEntry>, bool> AgreeToUpdate = _ => true;
+		public Func<ICollection<WorkLogEntry>, bool> AgreeToDeleteDuplicates = _ => true;
+		public Func<ICollection<WorkLogEntry>, bool> AgreeToDeleteOrphaned = _ => true;
+	}
 
-		public Func<IEnumerable<WorkLogEntry>, bool> AgreeToAdd = (workLogEntries) => true;
-		public Func<IEnumerable<WorkLogEntry>, bool> AgreeToUpdate = (workLogEntries) => true;
-		public Func<IEnumerable<WorkLogEntry>, bool> AgreeToDeleteDuplicates = (workLogEntries) => true;
-		public Func<IEnumerable<WorkLogEntry>, bool> AgreeToDeleteOrphaned = (workLogEntries) => true;
+	private readonly IExternalWorksheetRepository _source;
+	private readonly IJiraRepository _target;
+	private readonly IOptions<Options> _options;
 
-		public WorksheetSyncService(IExternalWorksheetRepository source, IJiraRepository target)
+	public WorksheetSyncService(
+		IExternalWorksheetRepository source,
+		IJiraRepository target,
+		IOptions<Options> options
+	)
+	{
+		_source = source;
+		_target = target;
+		_options = options;
+	}
+
+	public async Task<SyncReport> SynchronizeAsync(DateTime fromDate, DateTime toDate, ICollection<string> jiraProjectKeys, bool doPurge, int roundMinutes)
+	{
+		var sourceEntries = await _source.GetEntriesAsync(fromDate, toDate, jiraProjectKeys, roundMinutes);
+		var existingWorkLogs = doPurge ? await _target.GetWorkLogOfIssuesAsync(fromDate, toDate, sourceEntries.Select(x => x.IssueKey).ToList()) : Array.Empty<WorkLogEntry>();
+
+		var syncPlan = CreateSyncPlan(sourceEntries, existingWorkLogs, doPurge);
+		var syncReport = await ApplyAsync(syncPlan);
+		return syncReport;
+	}
+
+	public static SyncPlan CreateSyncPlan(WorkLogEntry[] sourceEntries, ICollection<WorkLogEntry> existingWorkLogs, bool doPurge)
+	{
+		var syncPlan = new SyncPlan();
+
+		if (!doPurge)
 		{
-			_source = source;
-			_target = target;
-
-		}
-
-		public SyncReport Syncronize(DateTime fromDate, DateTime toDate, IEnumerable<string> jiraProjectKeys, bool doPurge, int roundMinutes)
-		{
-			var sourceEntries = _source.GetEntries(fromDate, toDate, jiraProjectKeys);
-			var targetEntries = doPurge ? _target.GetEntries(fromDate, toDate, jiraProjectKeys) : new WorkLogEntry[0];
-
-			RoundMinutes(sourceEntries, roundMinutes);
-			RoundMinutes(targetEntries, roundMinutes);
-
-			var syncPlan = CreateSyncPlan(sourceEntries, targetEntries, doPurge);
-			var syncReport = Apply(syncPlan);
-			return syncReport;
-		}
-
-		private void RoundMinutes(WorkLogEntry[] entries, int roundMinutes)
-		{
-			foreach (var entry in entries)
-			{
-				entry.Round(roundMinutes);
-			}
-		}
-
-		public static SyncPlan CreateSyncPlan(WorkLogEntry[] sourceEntries, WorkLogEntry[] targetEntries, bool doPurge)
-		{
-			if (sourceEntries == null)
-				sourceEntries = new WorkLogEntry[0];
-
-			if (targetEntries == null)
-				targetEntries = new WorkLogEntry[0];
-
-			var syncPlan = new SyncPlan();
-
-			if (!doPurge)
-			{
-				syncPlan.ToAdd.AddRange(sourceEntries);
-				return syncPlan;
-			}
-
-			var withoutSourceId = targetEntries.Where(e => string.IsNullOrEmpty(e.SourceId)).ToArray();
-			syncPlan.ToDeleteOrphaned.AddRange(withoutSourceId);
-			targetEntries = targetEntries.Except(withoutSourceId).ToArray();
-
-			var duplicates = targetEntries
-						.GroupBy(e => e.SourceId)
-					.Where(g => g.Count() > 1)
-					.SelectMany(g => g.ToList())
-						.ToList();
-			syncPlan.ToDeleteDuplicates.AddRange(duplicates);
-			targetEntries = targetEntries.Except(duplicates).ToArray();
-
-			var orphaned =
-					targetEntries.Where(target => !sourceEntries.Any(source => source.SourceId == target.SourceId && source.IssueKey == target.IssueKey)).ToArray();
-			syncPlan.ToDeleteOrphaned.AddRange(orphaned);
-			targetEntries = targetEntries.Except(orphaned).ToArray();
-
-			var newSourceEntries =
-					sourceEntries.Where(source => targetEntries.All(target => target.SourceId != source.SourceId)).ToArray();
-			syncPlan.ToAdd.AddRange(newSourceEntries);
-			sourceEntries = sourceEntries.Except(newSourceEntries).ToArray();
-
-			var sourceLookup = sourceEntries.ToDictionary(s => s.SourceId);
-			var toUpdateTargetEntries = targetEntries
-					.Where(target => sourceLookup.ContainsKey(target.SourceId) && target.DifferentFrom(sourceLookup[target.SourceId]))
-					.Select(target => { target.Syncronize(sourceLookup[target.SourceId]); return target; }).ToList();
-			syncPlan.ToUpdate.AddRange(toUpdateTargetEntries);
-			targetEntries = targetEntries.Except(toUpdateTargetEntries).ToArray();
-			sourceEntries = sourceEntries.Except(sourceEntries.Where(source => toUpdateTargetEntries.Any(e => e.SourceId == source.SourceId))).ToArray();
-
-			var entriesWithNoChanges = targetEntries
-					.Where(target => sourceLookup.ContainsKey(target.SourceId) && !target.DifferentFrom(sourceLookup[target.SourceId])).ToArray();
-			syncPlan.NoChanges.AddRange(entriesWithNoChanges);
-			targetEntries = targetEntries.Except(entriesWithNoChanges).ToArray();
-			sourceEntries = sourceEntries.Except(sourceEntries.Where(source => entriesWithNoChanges.Any(e => e.SourceId == source.SourceId))).ToArray();
-
-			//at this point only new source entries left
 			syncPlan.ToAdd.AddRange(sourceEntries);
-
 			return syncPlan;
 		}
 
+		var withoutSourceId = existingWorkLogs.Where(e => string.IsNullOrEmpty(e.SourceId)).ToArray();
+		syncPlan.ToDeleteOrphaned.AddRange(withoutSourceId);
+		existingWorkLogs = existingWorkLogs.Except(withoutSourceId).ToArray();
 
-		public SyncReport Apply(SyncPlan syncPlan)
+		var duplicates = existingWorkLogs
+			.GroupBy(e => e.SourceId)
+			.Where(g => g.Count() > 1)
+			.SelectMany(g => g.ToList())
+			.ToList();
+		syncPlan.ToDeleteDuplicates.AddRange(duplicates);
+		existingWorkLogs = existingWorkLogs.Except(duplicates).ToArray();
+
+		var orphaned =
+			existingWorkLogs.Where(target => !sourceEntries.Any(source => source.SourceId == target.SourceId && source.IssueKey == target.IssueKey)).ToArray();
+		syncPlan.ToDeleteOrphaned.AddRange(orphaned);
+		existingWorkLogs = existingWorkLogs.Except(orphaned).ToArray();
+
+		var newSourceEntries =
+			sourceEntries.Where(source => existingWorkLogs.All(target => target.SourceId != source.SourceId)).ToArray();
+		syncPlan.ToAdd.AddRange(newSourceEntries);
+		sourceEntries = sourceEntries.Except(newSourceEntries).ToArray();
+
+		var sourceLookup = sourceEntries.ToDictionary(s => s.SourceId);
+		var toUpdateTargetEntries = existingWorkLogs
+			.Where(target => sourceLookup.ContainsKey(target.SourceId) && target.DifferentFrom(sourceLookup[target.SourceId]))
+			.Select(target =>
+			{
+				target.Synchronize(sourceLookup[target.SourceId]);
+				return target;
+			}).ToList();
+		syncPlan.ToUpdate.AddRange(toUpdateTargetEntries);
+		existingWorkLogs = existingWorkLogs.Except(toUpdateTargetEntries).ToArray();
+		sourceEntries = sourceEntries.Except(sourceEntries.Where(source => toUpdateTargetEntries.Any(e => e.SourceId == source.SourceId))).ToArray();
+
+		var entriesWithNoChanges = existingWorkLogs
+			.Where(target => sourceLookup.ContainsKey(target.SourceId) && !target.DifferentFrom(sourceLookup[target.SourceId])).ToArray();
+		syncPlan.NoChanges.AddRange(entriesWithNoChanges);
+		existingWorkLogs = existingWorkLogs.Except(entriesWithNoChanges).ToArray();
+		sourceEntries = sourceEntries.Except(sourceEntries.Where(source => entriesWithNoChanges.Any(e => e.SourceId == source.SourceId))).ToArray();
+
+		//at this point only new source entries left
+		syncPlan.ToAdd.AddRange(sourceEntries);
+
+		return syncPlan;
+	}
+
+
+	public async Task<SyncReport> ApplyAsync(SyncPlan syncPlan)
+	{
+		var syncReport = new SyncReport();
+
+		if (syncPlan.ToAdd.Any() && _options.Value.AgreeToAdd(syncPlan.ToAdd))
 		{
-			var syncReport = new SyncReport();
-
-			if (syncPlan.ToAdd.Any() && AgreeToAdd(syncPlan.ToAdd))
-				syncReport.AddedEntries = syncPlan.ToAdd.Select(item => _target.AddWorkLog(item)).ToList();
-
-			if (syncPlan.ToUpdate.Any() && AgreeToUpdate(syncPlan.ToUpdate))
-				syncReport.UpdatedEntries = syncPlan.ToUpdate.Select(item => _target.UpdateWorkLog(item)).ToList();
-
-			if (syncPlan.ToDeleteOrphaned.Any() && AgreeToDeleteOrphaned(syncPlan.ToDeleteOrphaned))
-				syncReport.DeletedOrphanedEntries = syncPlan.ToDeleteOrphaned.Select(item => _target.DeleteWorkLog(item)).ToList();
-
-			if (syncPlan.ToDeleteDuplicates.Any() && AgreeToDeleteDuplicates(syncPlan.ToDeleteDuplicates))
-				syncReport.DeletedDuplicateEntries = syncPlan.ToDeleteDuplicates.Select(item => _target.DeleteWorkLog(item)).ToList();
-
-			syncReport.NoChanges = syncPlan.NoChanges;
-
-			return syncReport;
+			foreach (var workLog in syncPlan.ToAdd)
+				syncReport.AddedEntries.Add(await _target.AddWorkLogAsync(workLog));
 		}
 
-		public void AddWorkLog(WorkLogEntry entry)
+		if (syncPlan.ToUpdate.Any() && _options.Value.AgreeToUpdate(syncPlan.ToUpdate))
 		{
-			_target.AddWorkLog(entry);
+			foreach (var workLog in syncPlan.ToUpdate)
+				syncReport.UpdatedEntries.Add(await _target.UpdateWorkLogAsync(workLog));
 		}
+
+		if (syncPlan.ToDeleteOrphaned.Any() && _options.Value.AgreeToDeleteOrphaned(syncPlan.ToDeleteOrphaned))
+		{
+			foreach (var workLog in syncPlan.ToDeleteOrphaned)
+				syncReport.DeletedOrphanedEntries.Add(await _target.DeleteWorkLogAsync(workLog));
+		}
+
+		if (syncPlan.ToDeleteDuplicates.Any() && _options.Value.AgreeToDeleteDuplicates(syncPlan.ToDeleteDuplicates))
+		{
+			foreach (var workLog in syncPlan.ToDeleteDuplicates)
+				syncReport.DeletedDuplicateEntries.Add(await _target.DeleteWorkLogAsync(workLog));
+		}
+
+		syncReport.NoChanges = syncPlan.NoChanges;
+
+		return syncReport;
 	}
 }

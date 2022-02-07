@@ -3,91 +3,98 @@ using System.Configuration;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace JiraTogglSync.CommandLine
+namespace JiraTogglSync.CommandLine;
+
+public class ConfigurationHelper
 {
-	public class ConfigurationHelper
+	private static readonly byte[] Entropy = Encoding.Unicode.GetBytes("JiraTogglSync.Salt");
+
+	public static string GetValueFromConfig(string key, Func<string> askForValue, string defaultValue = null, Func<string, bool> isValueValid = null)
 	{
-		private static readonly byte[] Entropy = Encoding.Unicode.GetBytes("JiraTogglSync.Salt");
+		var value = ConfigurationManager.AppSettings[key];
 
-		public static string GetValueFromConfig(string key, Func<string> askForValue, string defaultValue = null, Func<string, bool> isValueValid = null)
+		if (value != null)
+			return value;
+
+		value = AskForValueOrUseDefault(askForValue, defaultValue);
+
+		while (isValueValid != null && !isValueValid(value))
 		{
-			var value = ConfigurationManager.AppSettings[key];
-
-			if (value != null)
-				return value;
-
 			value = AskForValueOrUseDefault(askForValue, defaultValue);
+		}
 
-			while (isValueValid != null && !isValueValid(value))
+		SaveConfig(key, value);
+
+		return value;
+	}
+
+	private static string AskForValueOrUseDefault(Func<string> askForValue, string defaultValue)
+	{
+		var value = askForValue();
+
+		if (string.IsNullOrEmpty(value))
+			value = defaultValue ?? "";
+
+		return value;
+	}
+
+	public static string GetEncryptedValueFromConfig(string key, Func<string> askForValue)
+	{
+		var value = ConfigurationManager.AppSettings[key];
+
+		if (value != null)
+		{
+			try
 			{
-				value = AskForValueOrUseDefault(askForValue, defaultValue);
+				return DecryptString(value);
 			}
-
-			SaveConfig(key, value);
-
-			return value;
-		}
-
-		private static string AskForValueOrUseDefault(Func<string> askForValue, string defaultValue)
-		{
-			var value = askForValue();
-
-			if (string.IsNullOrEmpty(value))
-				value = defaultValue ?? "";
-
-			return value;
-		}
-
-		public static string GetEncryptedValueFromConfig(string key, Func<string> askForValue)
-		{
-			var value = ConfigurationManager.AppSettings[key];
-
-			if (value != null)
+			catch (CryptographicException ex)
 			{
-				try
-				{
-					return DecryptString(value);
-				}
-				catch (CryptographicException ex)
-				{
-					throw new ApplicationException($"Cannot decrypt App.config's '{key}' value. Delete it and relaunch the app.", ex);
-				}
+				throw new ApplicationException($"Cannot decrypt App.config's '{key}' value. Delete it and relaunch the app.", ex);
 			}
-
-			value = askForValue();
-
-			SaveConfig(key, EncryptString(value));
-
-			return value;
 		}
 
-		private static void SaveConfig(string key, string value)
+		value = askForValue();
+
+		SaveConfig(key, EncryptString(value));
+
+		return value;
+	}
+
+	private static void SaveConfig(string key, string value)
+	{
+		var configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+		configuration.AppSettings.Settings.Add(key, value);
+		configuration.Save();
+
+		ConfigurationManager.RefreshSection("appSettings");
+	}
+
+	private static string EncryptString(string input)
+	{
+		if (OperatingSystem.IsWindows())
 		{
-			Configuration configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-			configuration.AppSettings.Settings.Add(key, value);
-			configuration.Save();
-
-			ConfigurationManager.RefreshSection("appSettings");
-		}
-
-		private static string EncryptString(string input)
-		{
-			byte[] encryptedData = ProtectedData.Protect(
-					Encoding.ASCII.GetBytes(input),
-					Entropy,
-					DataProtectionScope.CurrentUser);
-
+			var encryptedData = ProtectedData.Protect(
+				Encoding.ASCII.GetBytes(input),
+				Entropy,
+				DataProtectionScope.CurrentUser);
 			return Convert.ToBase64String(encryptedData);
 		}
 
-		private static string DecryptString(string encryptedData)
-		{
-			byte[] decryptedData = ProtectedData.Unprotect(
-					Convert.FromBase64String(encryptedData),
-					Entropy,
-					DataProtectionScope.CurrentUser);
+		return Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
+	}
 
+	private static string DecryptString(string encryptedData)
+	{
+		if (OperatingSystem.IsWindows())
+		{
+			var decryptedData = ProtectedData.Unprotect(
+				Convert.FromBase64String(encryptedData),
+				Entropy,
+				DataProtectionScope.CurrentUser);
 			return Encoding.ASCII.GetString(decryptedData);
 		}
+
+		return Encoding.UTF8.GetString(Convert.FromBase64String(encryptedData));
 	}
 }

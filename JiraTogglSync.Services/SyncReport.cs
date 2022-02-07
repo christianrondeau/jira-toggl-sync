@@ -1,68 +1,55 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters;
 using System.Text;
 
-namespace JiraTogglSync.Services
+namespace JiraTogglSync.Services;
+
+public class SyncReport
 {
-	public class SyncReport
+	public List<OperationResult> AddedEntries { get; set; } = new();
+	public List<OperationResult> UpdatedEntries { get; set; } = new();
+	public List<OperationResult> DeletedOrphanedEntries { get; set; } = new();
+	public List<OperationResult> DeletedDuplicateEntries { get; set; } = new();
+	public List<WorkLogEntry> NoChanges { get; set; } = new();
+
+	public override string ToString()
 	{
-		public List<OperationResult> AddedEntries { get; set; }
-		public List<OperationResult> UpdatedEntries { get; set; }
-		public List<OperationResult> DeletedOrphanedEntries { get; set; }
-		public List<OperationResult> DeletedDuplicateEntries { get; set; }
-		public List<WorkLogEntry> NoChanges { get; set; }
-
-		public SyncReport()
-		{
-			this.AddedEntries = new List<OperationResult>();
-			this.UpdatedEntries = new List<OperationResult>();
-			this.DeletedOrphanedEntries = new List<OperationResult>();
-			this.DeletedDuplicateEntries = new List<OperationResult>();
-			this.NoChanges = new List<WorkLogEntry>();
-		}
-
-		public override string ToString()
-		{
-			var errorMessages = "";
-
-
-			var report =
-					$@"Syncronization report:
+		var report =
+			$@"Syncronization report:
 --------------------------------------------
-Added new entries:         {this.AddedEntries.Count(e => e.Status == Status.Success)}
-Updated existing entries:  {this.UpdatedEntries.Count(e => e.Status == Status.Success)}
-Deleted orphaned entries:  {this.DeletedOrphanedEntries.Count(e => e.Status == Status.Success)}
-Deleted duplicate entries: {this.DeletedDuplicateEntries.Count(e => e.Status == Status.Success)}
-Entries without changes:   {this.NoChanges.Count}
+Added new entries:         {AddedEntries.Count(e => e.Status == OperationResult.OperationStatus.Success)}
+Updated existing entries:  {UpdatedEntries.Count(e => e.Status == OperationResult.OperationStatus.Success)}
+Deleted orphaned entries:  {DeletedOrphanedEntries.Count(e => e.Status == OperationResult.OperationStatus.Success)}
+Deleted duplicate entries: {DeletedDuplicateEntries.Count(e => e.Status == OperationResult.OperationStatus.Success)}
+Entries without changes:   {NoChanges.Count}
 --------------------------------------------
 {DisplayErrorMessages()}
 ";
-			return report;
-		}
+		return report;
+	}
 
-		private string DisplayErrorMessages()
+	private string DisplayErrorMessages()
+	{
+		var allErrors = AddedEntries.Where(e => e.Status == OperationResult.OperationStatus.Error)
+			.Union(UpdatedEntries.Where(e => e.Status == OperationResult.OperationStatus.Error))
+			.Union(DeletedDuplicateEntries.Where(e => e.Status == OperationResult.OperationStatus.Error))
+			.Union(DeletedOrphanedEntries.Where(e => e.Status == OperationResult.OperationStatus.Error))
+			.ToList();
+
+		if (allErrors.Any())
 		{
-			var allErrors = this.AddedEntries.Where(e => e.Status == Status.Error)
-					.Union(this.UpdatedEntries.Where(e => e.Status == Status.Error))
-					.Union(this.DeletedDuplicateEntries.Where(e => e.Status == Status.Error))
-					.Union(this.DeletedOrphanedEntries.Where(e => e.Status == Status.Error));
-
-			if (allErrors.Any())
+			var sb = new StringBuilder();
+			var wereErrors = allErrors.Count == 1 ? "was an ERROR" : "were ERRORS";
+			sb.AppendLine($"There {wereErrors} during synchronization process:");
+			foreach (var error in allErrors)
 			{
-				var sb = new StringBuilder();
-				var wereErrors = allErrors.Count() == 1 ? "was an ERROR" : "were ERRORS";
-				sb.AppendLine($"There {wereErrors} during syncronization process:");
-				foreach (var error in allErrors)
-				{
-					sb.AppendLine(error.OperationArgument.ToString());
-					sb.AppendLine("\tError:" + (error.Message ?? "no error message"));
-				}
-
-				return sb.ToString();
+				sb.AppendLine(error.OperationArgument.ToString());
+				sb.AppendLine("\tError:" + (error.Message ?? "no error message"));
 			}
 
-			return string.Empty;
+			return sb.ToString();
 		}
+
+		return string.Empty;
 	}
 }
