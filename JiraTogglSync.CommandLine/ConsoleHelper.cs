@@ -1,30 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace JiraTogglSync.CommandLine
+namespace JiraTogglSync.CommandLine;
+
+public class ConsoleHelper
 {
-	public class ConsoleHelper
+	public static bool Confirm(string message)
 	{
-		public static bool Confirm(string message)
+		while (true)
 		{
-			if (!message.TrimEnd().EndsWith("(y/n)"))
-				message = message + " (y/n) ";
-
 			Console.WriteLine();
-			Console.Write(message);
+			Console.Write(message + " (y/n) ");
+
 			var input = Console.ReadLine();
-
-			if (input == "y")
-				return true;
-
-			if (input == "n")
-				return false;
-
-			Console.Error.WriteLine("Wrong value was provided.");
-			return Confirm(message);
+			switch (input)
+			{
+				case "y":
+					return true;
+				case "n":
+					return false;
+				default:
+					Console.Error.WriteLine("Wrong value was provided.");
+					break;
+			}
 		}
 	}
 }

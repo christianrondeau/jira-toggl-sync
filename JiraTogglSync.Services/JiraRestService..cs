@@ -1,134 +1,130 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using TechTalk.JiraRestClient;
+using Atlassian.Jira;
+using Microsoft.Extensions.Options;
+using RestSharp;
 
-namespace JiraTogglSync.Services
+namespace JiraTogglSync.Services;
+
+public interface IJiraRepository
 {
-	public class JiraRestService : IJiraRepository
+	Task<ICollection<WorkLogEntry>> GetWorkLogOfIssuesAsync(DateTime fromDate, DateTime toDate, ICollection<string> issueKeys);
+	Task<OperationResult> AddWorkLogAsync(WorkLogEntry entry);
+	Task<OperationResult> UpdateWorkLogAsync(WorkLogEntry entry);
+	Task<OperationResult> DeleteWorkLogAsync(WorkLogEntry entry);
+	Task<JiraUser> GetUserInformation();
+}
+
+public class JiraRestService : IJiraRepository
+{
+	public class Options
 	{
-		private readonly string _username;
+		[Required]
+		public string Instance { get; set; } = null!;
 
-		private readonly IJiraClient<IssueFields> _jira;
+		[Required]
+		public string Username { get; set; } = null!;
 
-		public JiraRestService(string instance, string username, string password)
-		{
-			_username = username;
-			_jira = new JiraClient<IssueFields>(instance, username, password);
-		}
+		[Required]
+		public string Password { get; set; } = null!;
+	}
 
-		public IEnumerable<Issue> LoadIssues(IEnumerable<string> keys)
-		{
-			if (!keys.Any()) return Enumerable.Empty<Issue>();
+	private readonly IOptions<Options> _options;
+	private readonly Jira _jira;
 
-			var jqlQuery = string.Format("key+in+({0})", string.Join(",", keys));
-			return _jira.GetIssuesByQuery(jqlQuery)
-				.Select(ConvertToIncident);
-		}
+	public JiraRestService(IOptions<Options> options)
+	{
+		_options = options;
+		_jira = Jira.CreateRestClient(
+			options.Value.Instance,
+			options.Value.Username,
+			options.Value.Password
+		);
+	}
 
-		public WorkLogEntry[] GetEntries(DateTime startDate, DateTime endDate, IEnumerable<string> jiraProjectKeys)
-		{
-			//Basically we need to find all work log items that have been created or edited within start and end dates.
-			//Note: since we don't have endpoint for 'Get ids of worklogs modified since', we will find those work logs 
-			//through issues that were recently modified.
+	public async Task<ICollection<WorkLogEntry>> GetWorkLogOfIssuesAsync(DateTime fromDate, DateTime toDate, ICollection<string> issueKeys)
+	{
+		// Basically we need to find all work log items that have been created or edited within start and end dates.
+		// Note: since we don't have endpoint for 'Get ids of worklogs modified since', we will find those work logs
+		// through issues that were recently modified.
 
-			if (jiraProjectKeys == null || !jiraProjectKeys.Any())
-				return new WorkLogEntry[0];
+		if (!issueKeys.Any())
+			return Array.Empty<WorkLogEntry>();
 
-			var jqlQuery = string.Format("project in ({0}) AND updated >= {1} AND updated <= {2}",
-				string.Join(", ", jiraProjectKeys),
-				startDate.ToString("yyyy-MM-dd"),
-				endDate.ToString("yyyy-MM-dd")
-				);
+		var tasks = new List<Task<List<WorkLogEntry>>>();
 
-			var recentlyUpdatedIssues = _jira.GetIssuesByQuery(jqlQuery);
+		var issues = await _jira.Issues.GetIssuesAsync(issueKeys);
+		foreach (var issue in issues)
+			tasks.Add(GetWorkLogEntriesAsync(fromDate, toDate, issue.Value));
 
-			var tasks = new List<Task<List<WorkLogEntry>>>();
+		await Task.WhenAll(tasks.ToArray());
 
-			foreach (var issue in recentlyUpdatedIssues)
+		return tasks.SelectMany(t => t.Result).ToArray();
+	}
+
+	private async Task<List<WorkLogEntry>> GetWorkLogEntriesAsync(DateTime startDate, DateTime endDate, Issue issue)
+	{
+		var workLogs = await issue.GetWorklogsAsync();
+
+		return workLogs
+			.Where(workLog => workLog.StartDate >= startDate
+			                  && workLog.StartDate.Value.AddSeconds(workLog.TimeSpentInSeconds) <= endDate
+			                  && (workLog.Author == _options.Value.Username || workLog.AuthorUser.Email == _options.Value.Username))
+			.Select(wl =>
 			{
-				tasks.Add(GetWorkLogEntriesAsync(startDate, endDate, issue));
-			}
+				var sourceId = WorkLogEntry.GetSourceId(wl.Comment);
+				return sourceId == null ? null : new WorkLogEntry(issue.Key.Value, sourceId, wl);
+			})
+			.WhereNotNull()
+			.ToList();
+	}
 
-			Task.WaitAll(tasks.ToArray());
-
-			return tasks.SelectMany(t => t.Result).ToArray();
-		}
-
-		private Task<List<WorkLogEntry>> GetWorkLogEntriesAsync(DateTime startDate, DateTime endDate, Issue<IssueFields> issue)
+	public async Task<OperationResult> UpdateWorkLogAsync(WorkLogEntry entry)
+	{
+		try
 		{
-			return Task.Run(() =>
-			   _jira.GetWorklogs(new IssueRef() { id = issue.id })
-								   .Where(workLog => workLog.started >= startDate
-												   && workLog.started.AddSeconds(workLog.timeSpentSeconds) <= endDate
-												   && ((workLog?.author?.name == _username) || (workLog?.author?.emailAddress == _username)))
-								   .Select(wl => new WorkLogEntry(wl, issue.key))
-								   .ToList()
-
-			);
+			// https://bitbucket.org/farmas/atlassian.net-sdk/issues/304/update-of-a-worklog
+			// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-worklogs/#api-rest-api-3-issue-issueidorkey-worklog-id-put
+			await _jira.RestClient.ExecuteRequestAsync(Method.PUT, $"rest/api/3/issue/{entry.IssueKey}/worklog/{entry.JiraWorkLog.Id}", entry.JiraWorkLog);
+			return OperationResult.Success(entry);
 		}
-
-		public OperationResult UpdateWorkLog(WorkLogEntry entry)
+		catch (Exception ex)
 		{
-			try
-			{
-				_jira.UpdateWorklog(
-					new IssueRef() { id = entry.IssueKey },
-					new Worklog()
-					{
-						id = entry.Id,
-						comment = entry.Description,
-						started = entry.Start,
-						timeSpentSeconds = (int)entry.RoundedDuration.TotalSeconds
-					});
-				return OperationResult.Success(entry);
-			}
-			catch (Exception ex)
-			{
-				return OperationResult.Error(ex.Message, entry);
-			}
+			return OperationResult.Error(ex.Message, entry);
 		}
+	}
 
-		public OperationResult DeleteWorkLog(WorkLogEntry entry)
+	public async Task<OperationResult> DeleteWorkLogAsync(WorkLogEntry entry)
+	{
+		try
 		{
-			try
-			{
-				_jira.DeleteWorklog(new IssueRef() { id = entry.IssueKey }, new Worklog() { id = entry.Id });
-				return OperationResult.Success(entry);
-			}
-			catch (Exception ex)
-			{
-				return OperationResult.Error(ex.Message, entry);
-			}
+			await _jira.Issues.DeleteWorklogAsync(entry.IssueKey, entry.JiraWorkLog.Id);
+			return OperationResult.Success(entry);
 		}
+		catch (Exception ex)
+		{
+			return OperationResult.Error(ex.Message, entry);
+		}
+	}
 
-		public OperationResult AddWorkLog(WorkLogEntry entry)
+	public async Task<OperationResult> AddWorkLogAsync(WorkLogEntry entry)
+	{
+		try
 		{
-			try
-			{
-				var timeSpentSeconds = (int)entry.RoundedDuration.TotalSeconds;
-				_jira.CreateWorklog(new IssueRef { id = entry.IssueKey }, timeSpentSeconds, entry.Description, entry.Start);
-				return OperationResult.Success(entry);
-			}
-			catch (Exception ex)
-			{
-				return OperationResult.Error(ex.Message, entry);
-			}
+			await _jira.Issues.AddWorklogAsync(entry.IssueKey, entry.JiraWorkLog);
+			return OperationResult.Success(entry);
 		}
+		catch (Exception ex)
+		{
+			return OperationResult.Error(ex.Message, entry);
+		}
+	}
 
-		private static Issue ConvertToIncident(Issue<IssueFields> issue)
-		{
-			return new Issue
-			{
-				Key = issue.key,
-				Summary = issue.fields.summary
-			};
-		}
-
-		public string GetUserInformation()
-		{
-			return _jira.GetLoggedInUser().self;
-		}
+	public async Task<JiraUser> GetUserInformation()
+	{
+		return await _jira.Users.GetMyselfAsync();
 	}
 }

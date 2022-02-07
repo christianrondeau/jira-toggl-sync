@@ -1,84 +1,59 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using TechTalk.JiraRestClient;
-using Toggl;
+using Atlassian.Jira;
 
-namespace JiraTogglSync.Services
+namespace JiraTogglSync.Services;
+
+public class WorkLogEntry
 {
-	public class WorkLogEntry
+	public string IssueKey { get; set; }
+	public Worklog JiraWorkLog { get; }
+
+	public string SourceId { get; set; }
+
+	public TimeSpan TimeSpent => JiraWorkLog.TimeSpentInSeconds > 0 ? TimeSpan.FromSeconds(JiraWorkLog.TimeSpentInSeconds) : TimeSpan.FromMinutes(int.Parse(JiraWorkLog.TimeSpent.Split("m")[0]));
+
+	public static string? GetSourceId(string? description)
 	{
-		public string Id { get; set; }
-		public string IssueKey { get; set; }
-		public string Description { get; set; }
-		public DateTime Start { get; set; }
-		public DateTime Stop { get; set; }
+		var regex = new Regex(@"\[toggl-id:(?<sourceId>[0-9]+)]");
+		var matchResult = regex.Match(description ?? "");
+		return matchResult.Success ? matchResult.Groups["sourceId"].Value : null;
+	}
 
-		public TimeSpan RoundedDuration { get; set; }
-		public string SourceId { get { return GetSourceId(this.Description); } }
+	public WorkLogEntry(string issueKey, string sourceId, DateTime startDate, int timeSpentInMinutes, string description)
+	{
+		IssueKey = issueKey;
+		SourceId = sourceId;
+		JiraWorkLog = new Worklog(timeSpentInMinutes + "m", startDate, description);
+	}
 
-		public static string GetSourceId(string input)
-		{
-			var regex = new Regex(@"\[toggl-id:(?<sourceId>[0-9]+)]");
-			var matchResult = regex.Match(input ?? "");
-			return matchResult.Success ? matchResult.Groups["sourceId"].Value : null;
-		}
+	public WorkLogEntry(string issueKey, string sourceId, Worklog jiraWorkLog)
+	{
+		IssueKey = issueKey;
+		SourceId = sourceId;
+		JiraWorkLog = jiraWorkLog;
+	}
 
-		public WorkLogEntry()
-		{
-		}
+	public override string ToString()
+	{
+		return $"[{IssueKey}] - {JiraWorkLog.StartDate:d} - {TimeSpent} - {JiraWorkLog.Comment}";
+	}
 
-		public WorkLogEntry(Worklog worklog, string jiraKey) : this()
-		{
-			this.Id = worklog.id;
-			this.Description = worklog.comment;
-			this.Start = worklog.started;
-			this.Stop = worklog.started.AddSeconds(worklog.timeSpentSeconds);
-			this.IssueKey = jiraKey; //important to capture key, becuase it will be needed to update WorkLog entry in JIRA
-		}
+	public bool DifferentFrom(WorkLogEntry other)
+	{
+		if (other.TimeSpent != TimeSpent)
+			return true;
+		if (other.JiraWorkLog.StartDate != JiraWorkLog.StartDate)
+			return true;
+		if (other.JiraWorkLog.Comment != JiraWorkLog.Comment)
+			return true;
+		return false;
+	}
 
-		public override string ToString()
-		{
-			var jiraKey = string.IsNullOrEmpty(this.IssueKey) ? "" : $"[{this.IssueKey}] - ";
-			return $"{jiraKey}{Start:d} - {RoundedDuration} - {Description}";
-		}
-
-		public void Round(int nbMinutes)
-		{
-			RoundedDuration = RoundToClosest(Stop - Start, new TimeSpan(0, 0, nbMinutes, 0));
-		}
-
-		public bool HasIssueKeyAssigned()
-		{
-			return !string.IsNullOrEmpty(this.IssueKey);
-		}
-
-		private static TimeSpan RoundToClosest(TimeSpan input, TimeSpan precision)
-		{
-			if (input < TimeSpan.Zero)
-			{
-				return -RoundToClosest(-input, precision);
-			}
-
-			return new TimeSpan(((input.Ticks + precision.Ticks / 2) / precision.Ticks) * precision.Ticks);
-		}
-
-		public void Syncronize(WorkLogEntry workLogEntry)
-		{
-			if (workLogEntry == null)
-				return;
-
-			this.Start = workLogEntry.Start;
-			this.Stop = workLogEntry.Stop;
-			this.Description = workLogEntry.Description;
-			this.RoundedDuration = workLogEntry.RoundedDuration;
-			//do not update id, because it uniquely identifies the entry
-		}
-
-		public bool DifferentFrom(WorkLogEntry workLogEntry)
-		{
-			return this.Start != workLogEntry.Start
-						 || this.Description != workLogEntry.Description
-						 || this.RoundedDuration != workLogEntry.RoundedDuration;
-		}
+	public void Synchronize(WorkLogEntry other)
+	{
+		JiraWorkLog.StartDate = other.JiraWorkLog.StartDate;
+		JiraWorkLog.TimeSpent = other.JiraWorkLog.TimeSpent;
+		JiraWorkLog.Comment = other.JiraWorkLog.Comment;
 	}
 }

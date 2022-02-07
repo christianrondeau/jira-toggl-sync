@@ -19,7 +19,7 @@ Only issues from the last 14 days with a matching JIRA key will be selected.
 
 Configurations
 ============
-### jira-decription-template
+### jira-description-template
 When Toggl's time entry is converted to JIRA's work log entry, additional information from toggl time entry can be stored in JIRA's work log comment.
 
 Following placeholders can be used in the template:
