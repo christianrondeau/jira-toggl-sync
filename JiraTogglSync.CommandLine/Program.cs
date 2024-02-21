@@ -53,7 +53,7 @@ public class Program
 
 		await using var sp = services.BuildServiceProvider();
 
-		Console.WriteLine("Toggl: Connected as {0}", sp.GetRequiredService<IExternalWorksheetRepository>().GetUserInformationAsync());
+		Console.WriteLine("Toggl: Connected as {0}", await sp.GetRequiredService<IExternalWorksheetRepository>().GetUserInformationAsync());
 		Console.WriteLine("JIRA: Connected as {0}", (await sp.GetRequiredService<IJiraRepository>().GetUserInformation()).Email);
 
 		var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
