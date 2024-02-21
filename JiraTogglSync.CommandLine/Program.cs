@@ -53,7 +53,7 @@ public class Program
 
 		await using var sp = services.BuildServiceProvider();
 
-		Console.WriteLine("Toggl: Connected as {0}", sp.GetRequiredService<IExternalWorksheetRepository>().GetUserInformationAsync());
+		Console.WriteLine("Toggl: Connected as {0}", await sp.GetRequiredService<IExternalWorksheetRepository>().GetUserInformationAsync());
 		Console.WriteLine("JIRA: Connected as {0}", (await sp.GetRequiredService<IJiraRepository>().GetUserInformation()).Email);
 
 		var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
@@ -88,7 +88,7 @@ public class Program
 	{
 		var jiraInstance = ConfigurationHelper.GetValueFromConfig(
 			"jira-instance",
-			() => AskFor("JIRA Instance"),
+			() => AskFor("JIRA Instance URL"),
 			null,
 			value =>
 			{
@@ -100,7 +100,7 @@ public class Program
 			});
 
 		var jiraUsername = ConfigurationHelper.GetValueFromConfig("jira-username", () => AskFor("JIRA Username"));
-		var jiraPassword = ConfigurationHelper.GetEncryptedValueFromConfig("jira-password", () => AskFor("JIRA Password"));
+		var jiraApiToken = ConfigurationHelper.GetEncryptedValueFromConfig("jira-apitoken", () => AskFor("JIRA API Token"));
 
 		services.AddSingleton<IJiraRepository, JiraRestService>();
 		services.AddOptions<JiraRestService.Options>()
@@ -108,13 +108,13 @@ public class Program
 			{
 				o.Instance = jiraInstance;
 				o.Username = jiraUsername;
-				o.Password = jiraPassword;
+				o.ApiToken = jiraApiToken;
 			}).ValidateDataAnnotations();
 	}
 
 	private static string AskFor(string what)
 	{
-		Console.Write("Please enter your {0}: ", what);
+		Console.Write("Please set '{0}': ", what);
 		return Console.ReadLine();
 	}
 }

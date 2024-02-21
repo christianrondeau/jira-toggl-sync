@@ -181,11 +181,11 @@ public class WorksheetSyncServiceTests
 		await target.Received(isAgreed ? syncPlan.ToDeleteDuplicates.Count + syncPlan.ToDeleteOrphaned.Count : 0).DeleteWorkLogAsync(Arg.Any<WorkLogEntry>());
 
 		// assert report reflect the numbers
-		Assert.AreEqual(report.AddedEntries.Count, isAgreed ? syncPlan.ToAdd.Count : 0);
-		Assert.AreEqual(report.UpdatedEntries.Count, isAgreed ? syncPlan.ToUpdate.Count : 0);
-		Assert.AreEqual(report.DeletedDuplicateEntries.Count, isAgreed ? syncPlan.ToDeleteDuplicates.Count : 0);
-		Assert.AreEqual(report.DeletedOrphanedEntries.Count, isAgreed ? syncPlan.ToDeleteOrphaned.Count : 0);
-		Assert.AreEqual(report.NoChanges.Count, syncPlan.NoChanges.Count);
+		Assert.That(report.AddedEntries.Count, Is.EqualTo(isAgreed ? syncPlan.ToAdd.Count : 0));
+		Assert.That(report.UpdatedEntries.Count, Is.EqualTo(isAgreed ? syncPlan.ToUpdate.Count : 0));
+		Assert.That(report.DeletedDuplicateEntries.Count, Is.EqualTo(isAgreed ? syncPlan.ToDeleteDuplicates.Count : 0));
+		Assert.That(report.DeletedOrphanedEntries.Count, Is.EqualTo(isAgreed ? syncPlan.ToDeleteOrphaned.Count : 0));
+		Assert.That(report.NoChanges.Count, Is.EqualTo(syncPlan.NoChanges.Count));
 	}
 }
 

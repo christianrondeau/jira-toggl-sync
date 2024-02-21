@@ -29,7 +29,7 @@ public class JiraRestService : IJiraRepository
 		public string Username { get; set; } = null!;
 
 		[Required]
-		public string Password { get; set; } = null!;
+		public string ApiToken { get; set; } = null!;
 	}
 
 	private readonly IOptions<Options> _options;
@@ -41,7 +41,7 @@ public class JiraRestService : IJiraRepository
 		_jira = Jira.CreateRestClient(
 			options.Value.Instance,
 			options.Value.Username,
-			options.Value.Password
+			options.Value.ApiToken
 		);
 	}
 
