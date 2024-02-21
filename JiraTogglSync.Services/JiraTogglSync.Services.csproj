@@ -4,8 +4,8 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Atlassian.SDK" Version="12.4.0" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+		<PackageReference Include="Atlassian.SDK" Version="13.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
 		<PackageReference Include="Toggl.Api" Version="8.0.7" />
 	</ItemGroup>
 </Project>
