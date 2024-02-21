@@ -9,9 +9,10 @@ public class WorkLogEntryTests
 	[Test]
 	public void CanDisplayNicelyAsString()
 	{
+		var workLogEntryDate = new DateTime(2014, 03, 25);
 		Assert.That(
-			"[some-issue-key] - 2014-03-25 - 01:30:00 - My Entry",
-			Is.EqualTo(new WorkLogEntry("some-issue-key", "some-source-id", new DateTime(2014, 03, 25), 90, "My Entry").ToString())
+			$"[some-issue-key] - {workLogEntryDate:d} - 01:30:00 - My Entry",
+			Is.EqualTo(new WorkLogEntry("some-issue-key", "some-source-id", workLogEntryDate, 90, "My Entry").ToString())
 		);
 	}
 
