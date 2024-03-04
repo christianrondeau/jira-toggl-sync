@@ -1,13 +1,13 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTogglSync.CommandLine", "JiraTogglSync.CommandLine\JiraTogglSync.CommandLine.csproj", "{DCF69B82-A833-4501-8F81-0BD0AB84652B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiraTogglSync.CommandLine", "JiraTogglSync.CommandLine\JiraTogglSync.CommandLine.csproj", "{DCF69B82-A833-4501-8F81-0BD0AB84652B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTogglSync.Services", "JiraTogglSync.Services\JiraTogglSync.Services.csproj", "{331AC73B-91AE-4E76-ACC1-3923D0479188}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiraTogglSync.Services", "JiraTogglSync.Services\JiraTogglSync.Services.csproj", "{331AC73B-91AE-4E76-ACC1-3923D0479188}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTogglSync.Tests", "JiraTogglSync.Tests\JiraTogglSync.Tests.csproj", "{CB8EC80D-7194-41E6-B188-18BAA0974631}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiraTogglSync.Tests", "JiraTogglSync.Tests\JiraTogglSync.Tests.csproj", "{CB8EC80D-7194-41E6-B188-18BAA0974631}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{854B975B-574A-497F-A0B9-8E08E52D870D}"
 	ProjectSection(SolutionItems) = preProject
