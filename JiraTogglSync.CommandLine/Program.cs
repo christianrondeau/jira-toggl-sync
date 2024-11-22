@@ -3,8 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using JiraTogglSync.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Toggl.Api.Interfaces;
-using Toggl.Api.Services;
+using Toggl.Api;
 
 namespace JiraTogglSync.CommandLine;
 
@@ -33,8 +32,8 @@ public class Program
 		var services = new ServiceCollection();
 		RegisterJira(services);
 		services.AddSingleton<ITimeUtil, TimeUtil>();
-		services.AddSingleton<IUserServiceAsync>(new UserServiceAsync(togglApiKey));
-		services.AddSingleton<ITimeEntryServiceAsync>(new TimeEntryServiceAsync(togglApiKey));
+		services.AddSingleton(new TogglClientOptions {Key = togglApiKey});
+		services.AddSingleton<TogglClient>();
 		services.AddSingleton<IExternalWorksheetRepository, TogglRepository>();
 		services.AddOptions<TogglRepository.Options>()
 			.Configure(o => o.DescriptionTemplate = jiraWorkItemDescriptionTemplate)
@@ -69,8 +68,8 @@ public class Program
 		var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
 
 		var syncReport = await sync.SynchronizeAsync(
-			DateTime.Now.Date.AddDays(-syncDays),
-			DateTime.Now.Date.AddDays(1),
+			DateTimeOffset.Now.Date.AddDays(-syncDays),
+			DateTimeOffset.Now.Date.AddDays(1),
 			jiraKeyPrefixes.Split(','),
 			doPurge == "y",
 			roundingToMinutes

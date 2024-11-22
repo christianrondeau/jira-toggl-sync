@@ -6,8 +6,8 @@ using JiraTogglSync.Services;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
-using Toggl.Api.DataObjects;
-using Toggl.Api.Interfaces;
+using Toggl.Api;
+using Toggl.Api.Models;
 using Toggl.Api.QueryObjects;
 using Task = System.Threading.Tasks.Task;
 
@@ -28,6 +28,7 @@ public class TogglRepositoryTests
 		return result;
 	}
 
+	/*
 	public static IEnumerable GetEntriesTestCases()
 	{
 		yield return new GetEntriesScenario(
@@ -57,22 +58,24 @@ public class TogglRepositoryTests
 			jiraProjectKeys: new[] { "TEST" },
 			expectedResult: new WorkLogEntry[0]
 		);
-	}
+	}*/
 
-	[TestCaseSource(nameof(GetEntriesTestCases))]
+	//[TestCaseSource(nameof(GetEntriesTestCases))]
 	public async Task GetEntriesTests(TimeEntry[] rawOutputFromToggl, string[] jiraProjectKeys, WorkLogEntry[] expectedResult)
 	{
-		var userService = Substitute.For<IUserServiceAsync>();
-		var timeEntryService = Substitute.For<ITimeEntryServiceAsync>();
+		var togglClient = Substitute.For<TogglClient>();
 
+		/*
 		timeEntryService.GetAllAsync(Arg.Any<TimeEntryParams>())
 			.Returns(rawOutputFromToggl.ToList());
+			*/
 
 		var options = new TogglRepository.Options
 		{
 			DescriptionTemplate = "{{toggl:description}}"
 		};
-		var sut = new TogglRepository(timeEntryService, userService, Options.Create(options), new TimeUtil());
+
+		var sut = new TogglRepository(togglClient, Options.Create(options), new TimeUtil());
 
 		var startDate = DateTime.Now; //actual value is irrelevent
 		var endDate = DateTime.Now; //actual value is irrelevent

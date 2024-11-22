@@ -11,7 +11,7 @@ namespace JiraTogglSync.Services;
 
 public interface IJiraRepository
 {
-	Task<ICollection<WorkLogEntry>> GetWorkLogOfIssuesAsync(DateTime fromDate, DateTime toDate, ICollection<string> issueKeys);
+	Task<ICollection<WorkLogEntry>> GetWorkLogOfIssuesAsync(DateTimeOffset fromDate, DateTimeOffset toDate, ICollection<string> issueKeys);
 	Task<OperationResult> AddWorkLogAsync(WorkLogEntry entry);
 	Task<OperationResult> UpdateWorkLogAsync(WorkLogEntry entry);
 	Task<OperationResult> DeleteWorkLogAsync(WorkLogEntry entry);
@@ -45,7 +45,7 @@ public class JiraRestService : IJiraRepository
 		);
 	}
 
-	public async Task<ICollection<WorkLogEntry>> GetWorkLogOfIssuesAsync(DateTime fromDate, DateTime toDate, ICollection<string> issueKeys)
+	public async Task<ICollection<WorkLogEntry>> GetWorkLogOfIssuesAsync(DateTimeOffset fromDate, DateTimeOffset toDate, ICollection<string> issueKeys)
 	{
 		// Basically we need to find all work log items that have been created or edited within start and end dates.
 		// Note: since we don't have endpoint for 'Get ids of worklogs modified since', we will find those work logs
@@ -65,7 +65,7 @@ public class JiraRestService : IJiraRepository
 		return tasks.SelectMany(t => t.Result).ToArray();
 	}
 
-	private async Task<List<WorkLogEntry>> GetWorkLogEntriesAsync(DateTime startDate, DateTime endDate, Issue issue)
+	private async Task<List<WorkLogEntry>> GetWorkLogEntriesAsync(DateTimeOffset startDate, DateTimeOffset endDate, Issue issue)
 	{
 		var workLogs = await issue.GetWorklogsAsync();
 
