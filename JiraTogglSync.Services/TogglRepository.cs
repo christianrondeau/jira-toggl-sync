@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using Toggl.Api.DataObjects;
-using Toggl.Api.Interfaces;
-using Toggl.Api.QueryObjects;
+using Toggl.Api;
+using Toggl.Api.Models;
 
 namespace JiraTogglSync.Services;
 
 public interface IExternalWorksheetRepository
 {
-	Task<WorkLogEntry[]> GetEntriesAsync(DateTime startDate, DateTime endDate, ICollection<string> jiraProjectKeys, int roundMinutes);
+	Task<WorkLogEntry[]> GetEntriesAsync(DateTimeOffset startDate, DateTimeOffset endDate, ICollection<string> jiraProjectKeys, int roundMinutes);
 	Task<string> GetUserInformationAsync();
 }
 
@@ -25,47 +25,39 @@ public class TogglRepository : IExternalWorksheetRepository
 		public string DescriptionTemplate { get; set; } = null!;
 	}
 
-	private readonly ITimeEntryServiceAsync _timeEntryService;
-	private readonly IUserServiceAsync _userService;
+	private readonly TogglClient _togglClient;
 	private readonly IOptions<Options> _options;
 	private readonly ITimeUtil _timeUtil;
 
 	public TogglRepository(
-		ITimeEntryServiceAsync timeEntryService,
-		IUserServiceAsync userService,
+		TogglClient togglClient,
 		IOptions<Options> options,
 		ITimeUtil timeUtil
 	)
 	{
-		_timeEntryService = timeEntryService;
-		_userService = userService;
+		_togglClient = togglClient;
 		_options = options;
 		_timeUtil = timeUtil;
 	}
 
 	public async Task<string> GetUserInformationAsync()
 	{
-		var currentUser = await _userService.GetCurrentAsync();
+		var currentUser = await _togglClient.Me.GetAsync(false, CancellationToken.None);
 		return $"{currentUser.FullName} ({currentUser.Email})";
 	}
 
 	public async Task<WorkLogEntry[]> GetEntriesAsync(
-		DateTime startDate,
-		DateTime endDate,
+		DateTimeOffset startDate,
+		DateTimeOffset endDate,
 		ICollection<string> jiraProjectKeys,
 		int roundMinutes
 	)
 	{
-		var timeEntryParams = new TimeEntryParams
-		{
-			StartDate = startDate,
-			EndDate = endDate
-		};
-
-		var togglTimeEntries = (await _timeEntryService.GetAllAsync(timeEntryParams))
+		var togglTimeEntries = (await _togglClient.TimeEntries.GetAsync(true, false, null, null, startDate, endDate, CancellationToken.None))
 			.Where(w => !string.IsNullOrEmpty(w.Description) && w.Stop != null);
 
 		return togglTimeEntries
+			.Where(x => x.Start > startDate)
 			.Select(t => ToWorkLogEntry(t, _options.Value.DescriptionTemplate, jiraProjectKeys, roundMinutes))
 			.WhereNotNull()
 			.ToArray();
@@ -82,25 +74,23 @@ public class TogglRepository : IExternalWorksheetRepository
 			return null;
 		if (togglTimeEntry.Stop == null)
 			return null;
-		if (togglTimeEntry.Id == null)
-			return null;
 		var issueKey = ExtractIssueKey(togglTimeEntry.Description, jiraProjectKeys);
 		if (issueKey == null)
 			return null;
 
-		var startDate = DateTime.Parse(togglTimeEntry.Start);
-		var stopDate = DateTime.Parse(togglTimeEntry.Stop);
+		var startDate = togglTimeEntry.Start;
+		var stopDate = togglTimeEntry.Stop;
 		var duration = stopDate - startDate;
 
 		var timeSpentInMinutes = (int) _timeUtil.RoundToClosest(
-			duration,
+			duration.Value,
 			TimeSpan.FromMinutes(roundMinutes)
 		).TotalMinutes;
 
 		return new WorkLogEntry(
 			issueKey,
-			togglTimeEntry.Id.Value.ToString(),
-			_timeUtil.RoundDateTimeToCloses(startDate, TimeSpan.FromMinutes(roundMinutes)),
+			togglTimeEntry.Id.ToString(),
+			_timeUtil.RoundDateTimeToCloses(startDate.Value, TimeSpan.FromMinutes(roundMinutes)),
 			timeSpentInMinutes,
 			CreateDescription(togglTimeEntry, descriptionTemplate)
 		);
@@ -122,12 +112,10 @@ public class TogglRepository : IExternalWorksheetRepository
 	{
 		var result = descriptionTemplate.Replace("{{toggl:id}}", $"[toggl-id:{timeEntry.Id}]")
 			.Replace("{{toggl:description}}", timeEntry.Description)
-			.Replace("{{toggl:createdWith}}", timeEntry.CreatedWith)
-			.Replace("{{toggl:isBillable}}", timeEntry.IsBillable == null ? "" : timeEntry.IsBillable.ToString())
+			.Replace("{{toggl:isBillable}}", timeEntry.Billable.ToString())
 			.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
-			.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.TagNames ?? Enumerable.Empty<string>()))
-			.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString())
-			.Replace("{{toggl:updatedOn}}", timeEntry.UpdatedOn == null ? "" : timeEntry.UpdatedOn);
+			.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.Tags ?? Enumerable.Empty<string>()))
+			.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString());
 
 		return result;
 	}

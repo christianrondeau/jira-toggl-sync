@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using JiraTogglSync.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Toggl.Api.Interfaces;
-using Toggl.Api.Services;
+using Toggl.Api;
 
 namespace JiraTogglSync.CommandLine;
 
@@ -14,7 +12,6 @@ public class Program
 
 	public static async Task Main()
 	{
-		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 		var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
 		var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig(
 			"jira-description-template",
@@ -33,8 +30,8 @@ public class Program
 		var services = new ServiceCollection();
 		RegisterJira(services);
 		services.AddSingleton<ITimeUtil, TimeUtil>();
-		services.AddSingleton<IUserServiceAsync>(new UserServiceAsync(togglApiKey));
-		services.AddSingleton<ITimeEntryServiceAsync>(new TimeEntryServiceAsync(togglApiKey));
+		services.AddSingleton(new TogglClientOptions {Key = togglApiKey});
+		services.AddSingleton<TogglClient>();
 		services.AddSingleton<IExternalWorksheetRepository, TogglRepository>();
 		services.AddOptions<TogglRepository.Options>()
 			.Configure(o => o.DescriptionTemplate = jiraWorkItemDescriptionTemplate)
@@ -44,10 +41,10 @@ public class Program
 		services.AddOptions<WorksheetSyncService.Options>()
 			.Configure(o =>
 			{
-				o.AgreeToAdd = workLogEntries => ConsoleHelper.Confirm($"***NEW work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nADD {workLogEntries.Count} NEW work log entries?");
-				o.AgreeToDeleteDuplicates = workLogEntries => ConsoleHelper.Confirm($"***DUPLICATE work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nDELETE {workLogEntries.Count} DUPLICATE work log entries?");
-				o.AgreeToDeleteOrphaned = workLogEntries => ConsoleHelper.Confirm($"***ORPHANED work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nDELETE {workLogEntries.Count} ORPHANED work log entries?");
-				o.AgreeToUpdate = workLogEntries => ConsoleHelper.Confirm($"***CHANGED work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nUPDATE {workLogEntries.Count} CHANGED work log entries?");
+				o.AgreeToAdd = ConsoleHelper.ConfirmAdd;
+				o.AgreeToDeleteDuplicates = ConsoleHelper.ConfirmDeleteDuplicates;
+				o.AgreeToDeleteOrphaned = ConsoleHelper.ConfirmDeleteOrphaned;
+				o.AgreeToUpdate = ConsoleHelper.ConfirmUpdate;
 			}).ValidateDataAnnotations();
 
 
@@ -69,8 +66,8 @@ public class Program
 		var jiraKeyPrefixes = ConfigurationHelper.GetValueFromConfig("jira-prefixes", () => AskFor("JIRA Prefixes without the hyphen (comma-separated)"));
 
 		var syncReport = await sync.SynchronizeAsync(
-			DateTime.Now.Date.AddDays(-syncDays),
-			DateTime.Now.Date.AddDays(1),
+			DateTimeOffset.Now.Date.AddDays(-syncDays),
+			DateTimeOffset.Now.Date.AddDays(1),
 			jiraKeyPrefixes.Split(','),
 			doPurge == "y",
 			roundingToMinutes

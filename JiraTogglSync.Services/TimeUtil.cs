@@ -5,7 +5,7 @@ namespace JiraTogglSync.Services;
 public interface ITimeUtil
 {
 	TimeSpan RoundToClosest(TimeSpan input, TimeSpan precision);
-	DateTime RoundDateTimeToCloses(DateTime date, TimeSpan precision);
+	DateTimeOffset RoundDateTimeToCloses(DateTimeOffset date, TimeSpan precision);
 }
 
 public class TimeUtil : ITimeUtil
@@ -20,10 +20,10 @@ public class TimeUtil : ITimeUtil
 		return new TimeSpan((input.Ticks + precision.Ticks / 2) / precision.Ticks * precision.Ticks);
 	}
 
-	public DateTime RoundDateTimeToCloses(DateTime date, TimeSpan precision)
+	public DateTimeOffset RoundDateTimeToCloses(DateTimeOffset date, TimeSpan precision)
 	{
 		var ticks = (date.Ticks + precision.Ticks / 2 + 1) / precision.Ticks;
 
-		return new DateTime(ticks * precision.Ticks, date.Kind);
+		return new DateTimeOffset(ticks * precision.Ticks, date.Offset);
 	}
 }

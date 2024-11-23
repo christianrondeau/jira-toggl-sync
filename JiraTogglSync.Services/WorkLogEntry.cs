@@ -20,11 +20,11 @@ public class WorkLogEntry
 		return matchResult.Success ? matchResult.Groups["sourceId"].Value : null;
 	}
 
-	public WorkLogEntry(string issueKey, string sourceId, DateTime startDate, int timeSpentInMinutes, string description)
+	public WorkLogEntry(string issueKey, string sourceId, DateTimeOffset startDate, int timeSpentInMinutes, string description)
 	{
 		IssueKey = issueKey;
 		SourceId = sourceId;
-		JiraWorkLog = new Worklog(timeSpentInMinutes + "m", startDate, description);
+		JiraWorkLog = new Worklog(timeSpentInMinutes + "m", startDate.UtcDateTime, description);
 	}
 
 	public WorkLogEntry(string issueKey, string sourceId, Worklog jiraWorkLog)
@@ -36,7 +36,7 @@ public class WorkLogEntry
 
 	public override string ToString()
 	{
-		return $"[{IssueKey}] - {JiraWorkLog.StartDate:d} - {TimeSpent} - {JiraWorkLog.Comment}";
+		return $"[{IssueKey}] - {JiraWorkLog.StartDate:d} ({Math.Ceiling((DateTime.UtcNow - JiraWorkLog.StartDate!.Value).TotalDays)}d ago) - {TimeSpent} - {JiraWorkLog.Comment}";
 	}
 
 	public bool DifferentFrom(WorkLogEntry other)
