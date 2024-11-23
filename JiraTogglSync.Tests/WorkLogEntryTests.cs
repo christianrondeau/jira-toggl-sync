@@ -10,8 +10,9 @@ public class WorkLogEntryTests
 	public void CanDisplayNicelyAsString()
 	{
 		var workLogEntryDate = new DateTime(2014, 03, 25);
+		var dayAgo = Math.Ceiling((DateTime.Now - workLogEntryDate).TotalDays);
 		Assert.That(
-			$"[some-issue-key] - {workLogEntryDate:d} - 01:30:00 - My Entry",
+			$"[some-issue-key] - {workLogEntryDate:d} ({dayAgo}d ago) - 01:30:00 - My Entry",
 			Is.EqualTo(new WorkLogEntry("some-issue-key", "some-source-id", workLogEntryDate, 90, "My Entry").ToString())
 		);
 	}

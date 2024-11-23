@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using JiraTogglSync.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,6 @@ public class Program
 
 	public static async Task Main()
 	{
-		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 		var togglApiKey = ConfigurationHelper.GetEncryptedValueFromConfig("toggl-api-key", () => AskFor("Toggl API Key"));
 		var jiraWorkItemDescriptionTemplate = ConfigurationHelper.GetValueFromConfig(
 			"jira-description-template",
@@ -43,10 +41,10 @@ public class Program
 		services.AddOptions<WorksheetSyncService.Options>()
 			.Configure(o =>
 			{
-				o.AgreeToAdd = workLogEntries => ConsoleHelper.Confirm($"***NEW work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nADD {workLogEntries.Count} NEW work log entries?");
-				o.AgreeToDeleteDuplicates = workLogEntries => ConsoleHelper.Confirm($"***DUPLICATE work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nDELETE {workLogEntries.Count} DUPLICATE work log entries?");
-				o.AgreeToDeleteOrphaned = workLogEntries => ConsoleHelper.Confirm($"***ORPHANED work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nDELETE {workLogEntries.Count} ORPHANED work log entries?");
-				o.AgreeToUpdate = workLogEntries => ConsoleHelper.Confirm($"***CHANGED work log entries***\n{string.Join(Environment.NewLine, workLogEntries)}\nUPDATE {workLogEntries.Count} CHANGED work log entries?");
+				o.AgreeToAdd = ConsoleHelper.ConfirmAdd;
+				o.AgreeToDeleteDuplicates = ConsoleHelper.ConfirmDeleteDuplicates;
+				o.AgreeToDeleteOrphaned = ConsoleHelper.ConfirmDeleteOrphaned;
+				o.AgreeToUpdate = ConsoleHelper.ConfirmUpdate;
 			}).ValidateDataAnnotations();
 
 
