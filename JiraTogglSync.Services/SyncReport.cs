@@ -12,6 +12,14 @@ public class SyncReport
 	public List<OperationResult> DeletedDuplicateEntries { get; set; } = new();
 	public List<WorkLogEntry> NoChanges { get; set; } = new();
 
+	public double TotalTime => AddedEntries.Select(x => x.OperationArgument)
+		.Concat(UpdatedEntries.Select(x => x.OperationArgument))
+		.Concat(DeletedOrphanedEntries.Select(x => x.OperationArgument))
+		.Concat(DeletedDuplicateEntries.Select(x => x.OperationArgument))
+		.Concat(NoChanges)
+		.Sum(x => x.TimeSpent.TotalHours);
+
+
 	public override string ToString()
 	{
 		var report =
@@ -22,6 +30,7 @@ Updated existing entries:  {UpdatedEntries.Count(e => e.Status == OperationResul
 Deleted orphaned entries:  {DeletedOrphanedEntries.Count(e => e.Status == OperationResult.OperationStatus.Success)}
 Deleted duplicate entries: {DeletedDuplicateEntries.Count(e => e.Status == OperationResult.OperationStatus.Success)}
 Entries without changes:   {NoChanges.Count}
+Total: {TotalTime:f2} h
 --------------------------------------------
 {DisplayErrorMessages()}
 ";
