@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JiraTogglSync.Services;
 using Socolin.ANSITerminalColor;
 
@@ -34,7 +35,7 @@ public class ConsoleHelper
 		while (true)
 		{
 			Console.WriteLine();
-			Console.WriteLine($"\u2550\u2550\u2550 {foreground.Colorize(kind)} \u2550\u2550\u2550");
+			Console.WriteLine($"\u2550\u2550\u2550 {foreground.Colorize(kind)} ({workLogs.Sum(x => x.TimeSpent.TotalHours):f2} h) \u2550\u2550\u2550");
 			foreach (var workLogEntry in workLogs)
 				Console.WriteLine(workLogEntry.ToString());
 			Console.WriteLine($"{action} {workLogs.Count} {kind} work log entries ? (y/n)");
