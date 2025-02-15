@@ -43,7 +43,7 @@ public class WorkLogEntry
 	{
 		if (other.TimeSpent != TimeSpent)
 			return true;
-		if (other.JiraWorkLog.StartDate != JiraWorkLog.StartDate)
+		if (other.JiraWorkLog.StartDate?.ToUniversalTime() != JiraWorkLog.StartDate?.ToUniversalTime())
 			return true;
 		if (other.JiraWorkLog.Comment != JiraWorkLog.Comment)
 			return true;
